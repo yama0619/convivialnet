@@ -137,6 +137,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="fas fa-tachometer-alt mr-3"></i>
                     <span>ダッシュボード</span>
                 </a>
+                <a href="activities.php" class="flex items-center py-3 px-6 bg-blue-800 bg-opacity-30">
+                  <i class="fas fa-calendar-alt mr-3"></i>
+                  <span>活動記録管理</span>
+                </a>
                 <a href="blogs.php" class="flex items-center py-3 px-6 bg-blue-800 bg-opacity-30">
                     <i class="fas fa-newspaper mr-3"></i>
                     <span>技術ブログ管理</span>
@@ -170,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <h2 class="text-xl font-semibold text-gray-800">技術ブログ記事の編集</h2>
                     </div>
                     <div class="flex items-center">
-                        <a href="../tech-blog/post.php?id=<?php echo $id; ?>" class="text-blue-600 hover:text-blue-800 mr-4" target="_blank">
+                        <a href="../techbrog_detail.php?id=<?php echo $id; ?>" class="text-blue-600 hover:text-blue-800 mr-4" target="_blank">
                             <i class="fas fa-external-link-alt mr-1"></i>
                             記事を表示
                         </a>
@@ -373,7 +377,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: 'markdown=' + encodeURIComponent(markdownContent)
+                body: 'content=' + encodeURIComponent(markdownContent)
             })
             .then(response => response.text())
             .then(html => {
@@ -390,8 +394,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         }
 
-        // 初期表示時にプレビューを更新
-        updatePreview();
     </script>
 </body>
 </html>

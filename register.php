@@ -1,5 +1,7 @@
 <?php
-$mysqli = new mysqli("localhost", "root", "yama333", "convivialnet");
+
+// データベース接続
+require 'db.php';
 
 $error_message = "";
 $success_message = "";
@@ -16,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
         // メールアドレス検索
-        $stmt = $mysqli->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $stmt->store_result();
@@ -25,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $error_message = "このメールアドレスは既に登録されています。";
         } else {
             // ユーザー名、パスワード、メールアドレスをデータベースに挿入
-            $stmt = $mysqli->prepare("INSERT INTO users (username, password_hash, email) VALUES (?, ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO users (username, password_hash, email) VALUES (?, ?, ?)");
             $stmt->bind_param("sss", $username, $password_hash, $email);
 
             if ($stmt->execute()) {
@@ -33,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 // 3秒後にリダイレクト
                 header("refresh:3;url=login.php");
             } else {
-                $error_message = "エラー: " . $mysqli->error;
+                $error_message = "エラー: " . $conn->error;
             }
         }
     }

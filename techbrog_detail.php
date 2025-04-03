@@ -319,11 +319,6 @@ include 'includes/header.php';
                         <a href="tecblog.php?category_id=<?php echo urlencode($post['category_id']); ?>" class="px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200">
                             <?php echo htmlspecialchars($post['category_id']); ?>
                         </a>
-                        <?php foreach ($tags as $tag): ?>
-                            <a href="tecblog.php?tag=<?php echo urlencode($tag); ?>" class="px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200">
-                                <?php echo htmlspecialchars($tag); ?>
-                            </a>
-                        <?php endforeach; ?>
                     </div>
                     
                     <div class="flex items-center text-gray-600">

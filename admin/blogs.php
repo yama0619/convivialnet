@@ -227,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                 <div class="bg-white rounded-lg shadow mb-6">
                     <div class="p-4 border-b flex justify-between items-center">
                         <h3 class="text-lg font-semibold">技術ブログ一覧</h3>
-                        <a href="blog-add.php" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        <a href="blog_add.php" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
                             <i class="fas fa-plus mr-2"></i>新規追加
                         </a>
                     </div>
@@ -238,7 +238,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                                     <th class="p-4 font-medium">ID</th>
                                     <th class="p-4 font-medium">タイトル</th>
                                     <th class="p-4 font-medium">カテゴリ</th>
-                                    <th class="p-4 font-medium">タグ</th>
                                     <th class="p-4 font-medium">作成日</th>
                                     <th class="p-4 font-medium">操作</th>
                                 </tr>
@@ -256,28 +255,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                                                     <?php echo htmlspecialchars($row['category_id']); ?>
                                                 </span>
                                             </td>
-                                            <td class="p-4 text-sm">
-                                                <?php
-                                                $tags = explode(',', $row['tags'] ?? '');
-                                                $tags = array_map('trim', $tags);
-                                                $tags = array_filter($tags);
-                                                foreach (array_slice($tags, 0, 3) as $tag): ?>
-                                                    <span class="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs mr-1 mb-1">
-                                                        <?php echo htmlspecialchars($tag); ?>
-                                                    </span>
-                                                <?php endforeach; ?>
-                                                <?php if (count($tags) > 3): ?>
-                                                    <span class="inline-block px-2 py-1 bg-gray-100 text-gray-500 rounded-full text-xs">
-                                                        +<?php echo count($tags) - 3; ?>
-                                                    </span>
-                                                <?php endif; ?>
-                                            </td>
+                                            
                                             <td class="p-4 text-sm text-gray-500">
                                                 <?php echo date('Y/m/d', strtotime($row['created_at'])); ?>
                                             </td>
                                             <td class="p-4 text-sm">
                                                 <div class="flex space-x-2">
-                                                    <a href="../tech-blog/post.php?id=<?php echo $row['id']; ?>" class="text-gray-600 hover:text-gray-900" target="_blank" title="表示">
+                                                    <a href="../techbrog_detail.php?id=<?php echo $row['id']; ?>" class="text-gray-600 hover:text-gray-900" target="_blank" title="表示">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     <a href="blog_edit.php?id=<?php echo $row['id']; ?>" class="text-blue-600 hover:text-blue-800" title="編集">

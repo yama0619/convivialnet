@@ -54,16 +54,16 @@
         <!-- Mobile menu, hidden by default -->
         <div id="mobile-menu" class="hidden md:hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 border-b">
-                <a href="/" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100">
+                <a href="index.php" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100">
                     ホーム
                 </a>
-                <a href="index.php" class="block px-3 py-2 rounded-md text-base font-medium bg-gray-100">
+                <a href="list.php" class="block px-3 py-2 rounded-md text-base font-medium bg-gray-100">
                     活動記録
                 </a>
-                <a href="#" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100">
-                    メンバー
+                <a href="techbrog.php" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100">
+                    技術ブログ
                 </a>
-                <a href="#" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100">
+                <a href="contact.php" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100">
                     お問い合わせ
                 </a>
             </div>

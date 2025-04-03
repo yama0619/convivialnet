@@ -193,7 +193,7 @@ $recent_blogs_result = $conn->query($recent_blogs_query);
                                                     <?php echo date('Y/m/d', strtotime($activity['created_at'])); ?>
                                                 </td>
                                                 <td class="py-3 text-sm">
-                                                    <a href="activity-edit.php?id=<?php echo $activity['id']; ?>" class="text-blue-600 hover:text-blue-800">
+                                                    <a href="activity_edit.php?id=<?php echo $activity['id']; ?>" class="text-blue-600 hover:text-blue-800">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                 </td>
@@ -241,7 +241,7 @@ $recent_blogs_result = $conn->query($recent_blogs_query);
                                                     <?php echo date('Y/m/d', strtotime($blog['created_at'])); ?>
                                                 </td>
                                                 <td class="py-3 text-sm">
-                                                    <a href="blog-edit.php?id=<?php echo $blog['id']; ?>" class="text-blue-600 hover:text-blue-800">
+                                                    <a href="blog_edit.php?id=<?php echo $blog['id']; ?>" class="text-blue-600 hover:text-blue-800">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                 </td>
@@ -282,11 +282,11 @@ $recent_blogs_result = $conn->query($recent_blogs_query);
                             </div>
                             <span class="text-sm font-medium">カテゴリを管理</span>
                         </a>
-                        <a href="media.php" class="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-yellow-50 hover:border-yellow-200 transition-colors">
+                        <a href="profile.php" class="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-yellow-50 hover:border-yellow-200 transition-colors">
                             <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600 mb-3">
                                 <i class="fas fa-images"></i>
                             </div>
-                            <span class="text-sm font-medium">メディアを管理</span>
+                            <span class="text-sm font-medium">プロフィールを管理</span>
                         </a>
                     </div>
                 </div>

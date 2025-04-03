@@ -197,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                       <h2 class="text-xl font-semibold text-gray-800">活動記録の追加</h2>
                   </div>
                   <div class="flex items-center">
-                      <a href="../index.php" class="text-blue-600 hover:text-blue-800 mr-4" target="_blank">
+                      <a href="../list.php" class="text-blue-600 hover:text-blue-800 mr-4" target="_blank">
                           <i class="fas fa-external-link-alt mr-1"></i>
                           サイトを表示
                       </a>
@@ -361,19 +361,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           }
       });
 
-      // タグ追加機能
-      function addTag(tag) {
-          const tagsInput = document.getElementById('tags');
-          const currentTags = tagsInput.value.split(',').map(t => t.trim()).filter(t => t !== '');
-          
-          if (!currentTags.includes(tag)) {
-              if (currentTags.length > 0 && currentTags[0] !== '') {
-                  tagsInput.value = currentTags.join(', ') + ', ' + tag;
-              } else {
-                  tagsInput.value = tag;
-              }
-          }
-      }
 
       // Markdownプレビューの更新
       document.getElementById('content').addEventListener('input', updatePreview);
@@ -395,7 +382,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               headers: {
                   'Content-Type': 'application/x-www-form-urlencoded',
               },
-              body: 'markdown=' + encodeURIComponent(markdownContent)
+              body: 'content=' + encodeURIComponent(markdownContent)
           })
           .then(response => response.text())
           .then(html => {

@@ -64,7 +64,7 @@ include 'includes/header.php';
             <div class="grid md:grid-cols-2 gap-12 items-center">
                 <div>
                     <div class="aspect-[4/3] rounded-lg overflow-hidden">
-                        <!-- <img src="/images/about-us.png" alt="私たちの活動" class="w-full h-full object-cover" onerror="this.src='/placeholder.svg?height=400&width=600'; this.alt='組織の活動';"> -->
+                        <!-- <img src="/images/sava.jpg" alt="私たちの活動" class="w-full h-full object-cover" onerror="this.src='/placeholder.svg?height=400&width=600'; this.alt='組織の活動';"> -->
                     </div>
                 </div>
                 <div>

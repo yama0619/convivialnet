@@ -185,12 +185,6 @@ include 'includes/header.php';
                 <?php if ($result && $result->num_rows > 0): ?>
                     <div class="grid gap-6 md:grid-cols-2">
                         <?php while ($row = $result->fetch_assoc()): ?>
-                            <?php
-                                // タグの取得と整形
-                                $tags = explode(',', $row['tags'] ?? '');
-                                $tags = array_map('trim', $tags);
-                                $tags = array_filter($tags);
-                            ?>
                             <article class="bg-white rounded-lg shadow-md overflow-hidden hover-lift">
                                 <a href="techbrog_detail.php?id=<?php echo $row['id']; ?>" class="block">
                                     <div class="aspect-[16/9] relative">
@@ -215,18 +209,7 @@ include 'includes/header.php';
                                     </div>
                                 </a>
                                 <div class="p-6">
-                                    <div class="flex flex-wrap items-center gap-2 mb-3">
-                                        <?php foreach (array_slice($tags, 0, 3) as $tag): ?>
-                                            <a href="?tag=<?php echo urlencode($tag); ?>" class="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors">
-                                                <?php echo htmlspecialchars($tag); ?>
-                                            </a>
-                                        <?php endforeach; ?>
-                                        <?php if (count($tags) > 3): ?>
-                                            <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-500 rounded-full">
-                                                +<?php echo count($tags) - 3; ?>
-                                            </span>
-                                        <?php endif; ?>
-                                    </div>
+                                
                                     
                                     <h2 class="text-xl font-bold mb-2 line-clamp-2">
                                         <a href="techbrog_detail.php?id=<?php echo $row['id']; ?>" class="hover:text-blue-600 transition-colors">

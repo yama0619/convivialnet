@@ -151,7 +151,7 @@ $stmt->close();
 }
 ?>
 
-`<!DOCTYPE html>``<html lang="ja">
+<!DOCTYPE html><html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -231,7 +231,7 @@ $stmt->close();
                   <h2 class="text-xl font-semibold text-gray-800">技術ブログ記事の追加</h2>
               </div>
               <div class="flex items-center">
-                  <a href="../tech-blog/index.php" class="text-blue-600 hover:text-blue-800 mr-4" target="_blank">
+                  <a href="../techbrog.php" class="text-blue-600 hover:text-blue-800 mr-4" target="_blank">
                       <i class="fas fa-external-link-alt mr-1"></i>
                       ブログを表示
                   </a>
@@ -400,20 +400,6 @@ $stmt->close();
           }
       });
 
-      // タグ追加機能
-      function addTag(tag) {
-          const tagsInput = document.getElementById('tags');
-          const currentTags = tagsInput.value.split(',').map(t => t.trim()).filter(t => t !== '');
-          
-          if (!currentTags.includes(tag)) {
-              if (currentTags.length > 0 && currentTags[0] !== '') {
-                  tagsInput.value = currentTags.join(', ') + ', ' + tag;
-              } else {
-                  tagsInput.value = tag;
-              }
-          }
-      }
-
       // Markdownプレビューの更新
       document.getElementById('content').addEventListener('input', updatePreview);
       
@@ -434,7 +420,7 @@ $stmt->close();
               headers: {
                   'Content-Type': 'application/x-www-form-urlencoded',
               },
-              body: 'markdown=' + encodeURIComponent(markdownContent)
+              body: 'content=' + encodeURIComponent(markdownContent)
           })
           .then(response => response.text())
           .then(html => {
@@ -450,11 +436,6 @@ $stmt->close();
               updateButton.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>更新';
           });
       }
-
-      // 初期表示時にプレビューを更新
-      document.addEventListener('DOMContentLoaded', function() {
-          updatePreview();
-      });
   </script>
   </body>
 </html>

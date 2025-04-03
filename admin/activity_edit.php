@@ -214,7 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                       <h2 class="text-xl font-semibold text-gray-800">活動記録の編集</h2>
                   </div>
                   <div class="flex items-center">
-                      <a href="../activity-detail.php?id=<?php echo $id; ?>" class="text-blue-600 hover:text-blue-800 mr-4" target="_blank">
+                      <a href="../activity_detail.php?id=<?php echo $id; ?>" class="text-blue-600 hover:text-blue-800 mr-4" target="_blank">
                           <i class="fas fa-external-link-alt mr-1"></i>
                           記事を表示
                       </a>
@@ -419,7 +419,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               headers: {
                   'Content-Type': 'application/x-www-form-urlencoded',
               },
-              body: 'markdown=' + encodeURIComponent(markdownContent)
+              body: 'content=' + encodeURIComponent(markdownContent)
           })
           .then(response => response.text())
           .then(html => {
@@ -433,13 +433,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               // エラー時も更新ボタンを再度有効化
               updateButton.disabled = false;
               updateButton.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>更新';
-          });
+          });     
       }
-
-      // 初期表示時にプレビューを更新
-      document.addEventListener('DOMContentLoaded', function() {
-          updatePreview();
-      });
   </script>
 </body>
 </html>

@@ -222,22 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                                             <td class="p-4 text-sm">
                                                 <div class="line-clamp-1 max-w-xs"><?php echo htmlspecialchars($row['title']); ?></div>
                                             </td>
-                                            <td class="p-4 text-sm">
-                                                <?php
-                                                $tags = explode(',', $row['tags'] ?? '');
-                                                $tags = array_map('trim', $tags);
-                                                $tags = array_filter($tags);
-                                                foreach (array_slice($tags, 0, 3) as $tag): ?>
-                                                    <span class="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs mr-1 mb-1">
-                                                        <?php echo htmlspecialchars($tag); ?>
-                                                    </span>
-                                                <?php endforeach; ?>
-                                                <?php if (count($tags) > 3): ?>
-                                                    <span class="inline-block px-2 py-1 bg-gray-100 text-gray-500 rounded-full text-xs">
-                                                        +<?php echo count($tags) - 3; ?>
-                                                    </span>
-                                                <?php endif; ?>
-                                            </td>
+                                        
                                             <td class="p-4 text-sm text-gray-500">
                                                 <?php echo date('Y/m/d', strtotime($row['created_at'])); ?>
                                             </td>

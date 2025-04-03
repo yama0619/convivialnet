@@ -1,6 +1,9 @@
 <?php
 session_start();
-$mysqli = new mysqli("localhost", "root", "yama333", "convivialnet");
+// データベース接続
+require 'db.php';
+
+// $conn = new conn("localhost", "root", "yama333", "convivialnet");
 
 $error_message = "";
 
@@ -9,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password = $_POST["password"];
 
     // メールアドレスでユーザーを検索
-    $stmt = $mysqli->prepare("SELECT id, username, password_hash FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT id, username, password_hash FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $stmt->bind_result($user_id, $username, $password_hash);
