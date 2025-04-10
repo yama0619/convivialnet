@@ -285,14 +285,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                                 
                                 <div>
-                                    <div class="flex justify-between items-center mb-1">
-                                        <label class="block text-sm font-medium text-gray-700">プレビュー</label>
+                                    <div class="flex items-center mb-2">
+                                        <label class="block text-sm font-medium text-gray-700 mr-auto">プレビュー</label>
                                         <button 
                                             type="button" 
                                             id="preview_update_button" 
-                                            class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm"
+                                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm flex items-center shadow-sm"
                                         >
-                                            <i class="fas fa-sync-alt mr-1"></i>更新
+                                            <i class="fas fa-sync-alt mr-2"></i>プレビュー更新
                                         </button>
                                     </div>
                                     <div id="content_preview" class="content-preview markdown-body">
@@ -301,10 +301,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                             </div>
                             
-                            
-                            
-                            
-                            <div class="flex justify-end space-x-3">
+                            <div class="flex justify-end space-x-3 mt-8">
                                 <a href="blogs.php" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
                                     キャンセル
                                 </a>
@@ -346,7 +343,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // 更新ボタンを無効化し、ローディング表示
             const updateButton = document.getElementById('preview_update_button');
             updateButton.disabled = true;
-            updateButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>更新中...';
+            updateButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>更新中...';
             
             // サーバーにMarkdownをHTMLに変換するリクエストを送信
             fetch('markdown-preview.php', {
@@ -361,17 +358,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 document.getElementById('content_preview').innerHTML = html;
                 // 更新ボタンを再度有効化
                 updateButton.disabled = false;
-                updateButton.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>更新';
+                updateButton.innerHTML = '<i class="fas fa-sync-alt mr-2"></i>プレビュー更新';
             })
             .catch(error => {
                 console.error('Error:', error);
                 // エラー時も更新ボタンを再度有効化
                 updateButton.disabled = false;
-                updateButton.innerHTML = '<i class="fas fa-sync-alt mr-1"></i>更新';
+                updateButton.innerHTML = '<i class="fas fa-sync-alt mr-2"></i>プレビュー更新';
             });
         }
 
     </script>
 </body>
 </html>
-
