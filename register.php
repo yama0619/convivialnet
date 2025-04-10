@@ -11,10 +11,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password = $_POST["password"]; // パスワードをハッシュ化する前に長さをチェック
     $email = $_POST["email"];
 
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error_message = "有効なメールアドレスを入力してください。@と.の位置を確認してください。";
+    }
     // パスワードの長さチェック
-    if (strlen($password) < 4) {
+    elseif (strlen($password) < 4) {
         $error_message = "パスワードは4桁以上で入力してください。";
-    } else {
+    }
+    // パスワードに日本語が含まれていないかチェック
+    elseif (preg_match('/[\p{Hiragana}\p{Katakana}\p{Han}]/u', $password)) {
+        $error_message = "パスワードに日本語は使用できません。";
+    }
+    // パスワードに /\ が含まれていないかチェック
+    elseif (preg_match('/[\/\\\\]/', $password)) {
+        $error_message = "パスワードに / または \\ は使用できません。";
+    }
+    else {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
         // メールアドレス検索

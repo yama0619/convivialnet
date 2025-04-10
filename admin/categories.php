@@ -33,10 +33,10 @@ if (!$table_exists) {
 
 // 技術ブログのカテゴリ取得（カテゴリテーブルと記事数を結合）
 $blog_categories_query = "
-    SELECT bc.category_name, COUNT(t.id) as count 
+    SELECT bc.id, bc.category_name, COUNT(t.id) as count 
     FROM blog_categories bc
     LEFT JOIN tecblog t ON bc.category_name = t.category_id
-    GROUP BY bc.category_name
+    GROUP BY bc.id, bc.category_name
     ORDER BY bc.category_name
 ";
 $blog_categories_result = $conn->query($blog_categories_query);
@@ -399,7 +399,7 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
                             </thead>
                             <tbody class="divide-y divide-gray-200">
                                 <?php if ($blog_categories_result && $blog_categories_result->num_rows > 0): ?>
-                                    <?php while ($category_id = $blog_categories_result->fetch_assoc()): ?>
+                                    <?php while ($category = $blog_categories_result->fetch_assoc()): ?>
                                         <tr class="table-row-hover">
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center">
@@ -407,24 +407,24 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
                                                         <i class="fas fa-folder"></i>
                                                     </div>
                                                     <div class="ml-4">
-                                                        <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($category_id['category_name']); ?></div>
+                                                        <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($category['category_name']); ?></div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-gray-900"><?php echo $category_id['count']; ?> 記事</div>
+                                                <div class="text-sm text-gray-900"><?php echo $category['count']; ?> 記事</div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div class="flex space-x-2">
                                                     <button 
-                                                        onclick="showRenameModal('<?php echo addslashes(htmlspecialchars($category_id['category_name'])); ?>')" 
+                                                        onclick="showRenameModal('<?php echo addslashes(htmlspecialchars($category['category_name'])); ?>')" 
                                                         class="text-blue-600 hover:text-blue-900 transition-all"
                                                         title="カテゴリ名を変更"
                                                     >
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     <a 
-                                                        href="blogs.php?category_id=<?php echo urlencode($category_id['category_name']); ?>" 
+                                                        href="blogs.php?category_id=<?php echo urlencode($category['category_name']); ?>" 
                                                         class="text-gray-600 hover:text-gray-900 transition-all"
                                                         title="このカテゴリの記事を表示"
                                                     >

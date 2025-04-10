@@ -20,21 +20,24 @@ $search = isset($_GET['search']) ? $_GET['search'] : '';
 $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : '';
 
 // クエリの構築
-$sql = "SELECT id, title, description, category_id, created_at FROM tecblog WHERE 1=1";
-$count_sql = "SELECT COUNT(*) as total FROM tecblog WHERE 1=1";
+$sql = "SELECT t.id, t.title, t.description, t.category_id, t.created_at, bc.category_name 
+        FROM tecblog t 
+        LEFT JOIN blog_categories bc ON t.category_id = bc.id 
+        WHERE 1=1";
+$count_sql = "SELECT COUNT(*) as total FROM tecblog t WHERE 1=1";
 
 if (!empty($search)) {
     $search_term = '%' . $conn->real_escape_string($search) . '%';
-    $sql .= " AND (title LIKE '$search_term' OR description LIKE '$search_term')";
-    $count_sql .= " AND (title LIKE '$search_term' OR description LIKE '$search_term')";
+    $sql .= " AND (t.title LIKE '$search_term' OR t.description LIKE '$search_term')";
+    $count_sql .= " AND (t.title LIKE '$search_term' OR t.description LIKE '$search_term')";
 }
 
 if (!empty($category_id)) {
-    $sql .= " AND category_id = '" . $conn->real_escape_string($category_id) . "'";
-    $count_sql .= " AND category_id = '" . $conn->real_escape_string($category_id) . "'";
+    $sql .= " AND t.category_id = '" . $conn->real_escape_string($category_id) . "'";
+    $count_sql .= " AND t.category_id = '" . $conn->real_escape_string($category_id) . "'";
 }
 
-$sql .= " ORDER BY created_at DESC LIMIT $offset, $records_per_page";
+$sql .= " ORDER BY t.created_at DESC LIMIT $offset, $records_per_page";
 
 // クエリの実行
 $result = $conn->query($sql);
@@ -42,13 +45,13 @@ $count_result = $conn->query($count_sql);
 $total_records = $count_result->fetch_assoc()['total'];
 $total_pages = ceil($total_records / $records_per_page);
 
-// カテゴリの取得
-$categories_query = "SELECT DISTINCT category_id FROM tecblog ORDER BY category_id";
+// カテゴリの取得（blog_categoriesテーブルから取得）
+$categories_query = "SELECT id, category_name FROM blog_categories ORDER BY category_name";
 $categories_result = $conn->query($categories_query);
 $categories = [];
 if ($categories_result) {
     while ($cat = $categories_result->fetch_assoc()) {
-        $categories[] = $cat['category_id'];
+        $categories[] = $cat;
     }
 }
 
@@ -197,16 +200,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                                 >
                             </div>
                             <div>
-                                <label for="category" class="block text-sm font-medium text-gray-700 mb-1">カテゴリ</label>
+                                <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">カテゴリ</label>
                                 <select 
-                                    id="category" 
-                                    name="category" 
+                                    id="category_id" 
+                                    name="category_id" 
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     <option value="">すべてのカテゴリ</option>
                                     <?php foreach ($categories as $cat): ?>
-                                        <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo $category === $cat ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($cat); ?>
+                                        <option value="<?php echo htmlspecialchars($cat['id']); ?>" <?php echo $category_id == $cat['id'] ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($cat['category_name']); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -252,7 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                                             </td>
                                             <td class="p-4 text-sm">
                                                 <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-                                                    <?php echo htmlspecialchars($row['category_id']); ?>
+                                                    <?php echo htmlspecialchars($row['category_name'] ?? '未分類'); ?>
                                                 </span>
                                             </td>
                                             
@@ -292,7 +295,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                     <div class="p-4 border-t flex justify-center">
                         <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                             <?php if ($page > 1): ?>
-                                <a href="?page=<?php echo $page - 1; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($category) ? '&category=' . urlencode($category) : ''; ?>" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <a href="?page=<?php echo $page - 1; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($category_id) ? '&category_id=' . urlencode($category_id) : ''; ?>" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                                     <span class="sr-only">前へ</span>
                                     <i class="fas fa-chevron-left"></i>
                                 </a>
@@ -309,14 +312,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                                         <?php echo $i; ?>
                                     </span>
                                 <?php else: ?>
-                                    <a href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($category) ? '&category=' . urlencode($category) : ''; ?>" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    <a href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($category_id) ? '&category_id=' . urlencode($category_id) : ''; ?>" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
                                         <?php echo $i; ?>
                                     </a>
                                 <?php endif; ?>
                             <?php endfor; ?>
 
                             <?php if ($page < $total_pages): ?>
-                                <a href="?page=<?php echo $page + 1; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($category) ? '&category=' . urlencode($category) : ''; ?>" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <a href="?page=<?php echo $page + 1; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($category_id) ? '&category_id=' . urlencode($category_id) : ''; ?>" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                                     <span class="sr-only">次へ</span>
                                     <i class="fas fa-chevron-right"></i>
                                 </a>

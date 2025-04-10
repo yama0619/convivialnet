@@ -1,4 +1,13 @@
 <?php
+// または PHPMailer を手動で読み込む場合
+require 'PHPMailer/src/Exception.php';
+require 'PHPMailer/src/PHPMailer.php';
+require 'PHPMailer/src/SMTP.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
+
 // 初期化
 $name = $email = $subject = $message = '';
 $errors = [];
@@ -36,28 +45,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // エラーがなければメール送信処理
     if (empty($errors)) {
-        // メール送信先（管理者のメールアドレスに変更してください）
-        $to = 'mt.book4062@gmail.com';
+        // PHPMailerのインスタンスを作成
+        $mail = new PHPMailer(true);
         
-        // メールヘッダー
-        $headers = "From: $email\r\n";
-        $headers .= "Reply-To: $email\r\n";
-        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-        
-        // メール本文
-        $mailBody = "お名前: $name\n";
-        $mailBody .= "メールアドレス: $email\n";
-        $mailBody .= "件名: $subject\n\n";
-        $mailBody .= "メッセージ:\n$message\n";
-        
-        // メール送信（本番環境では有効にしてください）
-        mail($to, "お問い合わせ: $subject", $mailBody, $headers);
-        
-        // 送信成功フラグ（本番環境ではmail関数の戻り値を使用）
-        $success = true;
-        
-        // フォームをクリア
-        $name = $email = $subject = $message = '';
+        try {
+            // サーバー設定
+            $mail->SMTPDebug = SMTP::DEBUG_SERVER;  // デバッグ出力を有効化（本番環境では無効に）
+            $mail->isSMTP();                           // SMTPを使用
+            $mail->Host       = 'smtp.example.com';    // SMTPサーバー
+            $mail->SMTPAuth   = true;                  // SMTP認証を有効化
+            $mail->Username   = 'user@example.com';    // SMTPユーザー名
+            $mail->Password   = 'pass';            // SMTPパスワード
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // 暗号化（TLS）
+            $mail->Port       = 587;                   // TCPポート
+            $mail->CharSet    = 'UTF-8';               // 文字セット
+
+            // 送信元と送信先
+            $mail->setFrom($email, $name);             // 送信元（問い合わせ者）
+            $mail->addAddress('mt.book4062@gmail.com', 'ConvivialNet'); // 送信先（管理者）
+            $mail->addReplyTo($email, $name);          // 返信先
+
+            // メール内容
+            $mail->isHTML(false);                      // プレーンテキスト形式
+            $mail->Subject = "お問い合わせ: $subject";
+            
+            // メール本文
+            $mailBody = "お名前: $name\n";
+            $mailBody .= "メールアドレス: $email\n";
+            $mailBody .= "件名: $subject\n\n";
+            $mailBody .= "メッセージ:\n$message\n";
+            
+            $mail->Body = $mailBody;
+
+            // メール送信
+            $mail->send();
+            
+            // 送信成功
+            $success = true;
+            
+            // フォームをクリア
+            $name = $email = $subject = $message = '';
+            
+        } catch (Exception $e) {
+            // エラーメッセージを設定
+            $errors['mail'] = "メールの送信に失敗しました: {$mail->ErrorInfo}";
+        }
     }
 }
 
@@ -96,6 +128,14 @@ include 'includes/header.php';
               活動記録に戻る
             </a>
           </div>
+        </div>
+      <?php endif; ?>
+      
+      <?php if (isset($errors['mail'])): ?>
+        <!-- メール送信エラーメッセージ -->
+        <div class="bg-red-50 border border-red-200 text-red-800 rounded-lg p-6 mb-8">
+          <h3 class="text-lg font-medium mb-2">エラーが発生しました</h3>
+          <p><?php echo $errors['mail']; ?></p>
         </div>
       <?php endif; ?>
       

@@ -100,15 +100,17 @@ include 'includes/header.php';
 </head>
 <body class="bg-gray-50">
   <main class="container mx-auto px-4 py-8">
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold tracking-tight">活動記録</h1>
-      <p class="mt-2 text-gray-600">
-        私たちの最近の活動と成果を紹介します。
-      </p>
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight">活動記録</h1>
+        <p class="mt-2 text-gray-600">
+          私たちの最近の活動と成果を紹介します。
+        </p>
+      </div>
       
-      <!-- 検索フォーム -->
-      <div class="mt-4">
-        <form action="list.php" method="GET" class="flex w-full max-w-md">
+      <!-- 検索フォーム（右側に配置） -->
+      <div class="mt-4 md:mt-0">
+        <form action="list.php" method="GET" class="flex w-full md:w-64">
           <input 
             type="text" 
             name="search" 
@@ -116,7 +118,7 @@ include 'includes/header.php';
             value="<?php echo htmlspecialchars($searchQuery); ?>"
             class="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700">
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 whitespace-nowrap min-w-[60px]">
             検索
           </button>
         </form>
@@ -291,4 +293,3 @@ include 'includes/header.php';
   <?php include 'includes/footer.php'; ?>
 </body>
 </html>
-

@@ -10,8 +10,14 @@ if ($id <= 0) {
     exit;
 }
 
-// 記事データの取得
-$stmt = $conn->prepare("SELECT id, title, description, content, content_html, category_id, image_data, image_type, created_at FROM tecblog WHERE id = ?");
+// 記事データの取得（カテゴリ名も含める）
+$stmt = $conn->prepare("
+    SELECT t.id, t.title, t.description, t.content, t.content_html, 
+           t.category_id, t.created_at, bc.category_name 
+    FROM tecblog t
+    LEFT JOIN blog_categories bc ON t.category_id = bc.id
+    WHERE t.id = ?
+");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -24,21 +30,18 @@ if (!$result || $result->num_rows === 0) {
 $post = $result->fetch_assoc();
 $stmt->close();
 
-
 // 関連記事の取得
 $relatedPosts = [];
-if (!empty($tags)) {
-    $tagList = implode("','", array_map(function($tag) use ($conn) {
-        return $conn->real_escape_string($tag);
-    }, $tags));
-
-    $relatedSql = "SELECT id, title, image_data, image_type, created_at FROM tecblog 
-                WHERE id != ? AND (category_id = ? OR tags LIKE ?) 
-                ORDER BY created_at DESC LIMIT 3";
+if (!empty($post['category_id'])) {
+    $relatedSql = "
+        SELECT t.id, t.title, t.created_at, bc.category_name 
+        FROM tecblog t
+        LEFT JOIN blog_categories bc ON t.category_id = bc.id
+        WHERE t.id != ? AND t.category_id = ? 
+        ORDER BY t.created_at DESC LIMIT 3
+    ";
     $stmt = $conn->prepare($relatedSql);
-    $categoryParam = $post['category_id'];
-    $tagParam = '%' . implode('%', $tags) . '%';
-    $stmt->bind_param("iss", $id, $categoryParam, $tagParam);
+    $stmt->bind_param("ii", $id, $post['category_id']);
     $stmt->execute();
     $relatedResult = $stmt->get_result();
 
@@ -51,7 +54,13 @@ if (!empty($tags)) {
 }
 
 // 最新記事の取得（サイドバー用）
-$latestPostsQuery = "SELECT id, title, created_at FROM tecblog WHERE id != ? ORDER BY created_at DESC LIMIT 5";
+$latestPostsQuery = "
+    SELECT t.id, t.title, t.created_at, bc.category_name 
+    FROM tecblog t
+    LEFT JOIN blog_categories bc ON t.category_id = bc.id
+    WHERE t.id != ? 
+    ORDER BY t.created_at DESC LIMIT 5
+";
 $stmt = $conn->prepare($latestPostsQuery);
 $stmt->bind_param("i", $id);
 $stmt->execute();
@@ -63,7 +72,6 @@ if ($latestPostsResult) {
     }
 }
 $stmt->close();
-
 
 // ヘッダーの読み込み
 include 'includes/header.php';
@@ -169,15 +177,6 @@ include 'includes/header.php';
             color: #4b5563;
         }
         
-        .article-content img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 0.5rem;
-            margin: 2rem auto;
-            display: block;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        
         .article-content table {
             width: 100%;
             border-collapse: collapse;
@@ -210,9 +209,9 @@ include 'includes/header.php';
             overflow: hidden;
         }
         
-        /* ヒーローセクション */
-        .hero-gradient {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(79, 70, 229, 0.8));
+        /* ヘッダーセクション */
+        .header-gradient {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
         }
         
         /* カスタムスクロールバー */
@@ -229,51 +228,24 @@ include 'includes/header.php';
             border-radius: 20px;
         }
         
-        /* アニメーション */
-        .hover-lift {
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .hover-lift:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        
         /* 目次のアクティブ状態 */
         .toc-link.active {
             color: #2563eb;
             font-weight: 600;
         }
-        
-        /* タグ効果 */
-        .tag-hover {
-            transition: all 0.2s ease;
-        }
-        
-        .tag-hover:hover {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- ヒーローセクション -->
-    <?php if (!empty($post['image_data'])): ?>
-    <div class="relative h-64 md:h-96 overflow-hidden">
-        <img 
-            src="image.php?id=<?php echo $post['id']; ?>" 
-            alt="<?php echo htmlspecialchars($post['title']); ?>"
-            class="w-full h-full object-cover"
-        >
-        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
-        <div class="absolute inset-0 flex items-center justify-center">
-            <div class="text-center px-4">
-                <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 max-w-4xl mx-auto">
+    <!-- ヘッダーセクション -->
+    <div class="header-gradient text-white shadow-lg">
+        <div class="container mx-auto px-4 py-8">
+            <div class="text-center">
+                <h1 class="text-3xl md:text-4xl font-bold mb-4">
                     <?php echo htmlspecialchars($post['title']); ?>
                 </h1>
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-4">
-                    <a href="tecblog.php?category_id=<?php echo urlencode($post['category_id']); ?>" class="px-3 py-1 text-sm font-medium bg-blue-600 text-white rounded-full hover:bg-blue-700">
-                        <?php echo htmlspecialchars($post['category_id']); ?>
+                    <a href="tecblog.php?category_id=<?php echo urlencode($post['category_id']); ?>" class="px-3 py-1 text-sm font-medium bg-blue-600/80 text-white rounded-full hover:bg-blue-700">
+                        <?php echo htmlspecialchars($post['category_name'] ?? '未分類'); ?>
                     </a>
                 </div>
                 <div class="text-white text-sm md:text-base">
@@ -284,10 +256,9 @@ include 'includes/header.php';
             </div>
         </div>
     </div>
-    <?php endif; ?>
 
     <main class="container mx-auto px-4 py-8">
-        <!-- Breadcrumb navigation -->
+        <!-- パンくずナビゲーション -->
         <nav class="flex mb-6 text-sm">
             <ol class="flex items-center space-x-2">
                 <li>
@@ -311,27 +282,6 @@ include 'includes/header.php';
         <div class="flex flex-col lg:flex-row gap-8">
             <!-- 記事本文 -->
             <div class="w-full lg:w-2/3">
-                <?php if (empty($post['image_data'])): ?>
-                <div class="mb-6">
-                    <h1 class="text-3xl md:text-4xl font-bold mb-4"><?php echo htmlspecialchars($post['title']); ?></h1>
-                    
-                    <div class="flex flex-wrap items-center gap-2 mb-4">
-                        <a href="tecblog.php?category_id=<?php echo urlencode($post['category_id']); ?>" class="px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200">
-                            <?php echo htmlspecialchars($post['category_id']); ?>
-                        </a>
-                    </div>
-                    
-                    <div class="flex items-center text-gray-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <time datetime="<?php echo date('Y-m-d', strtotime($post['created_at'])); ?>">
-                            <?php echo date('Y年m月d日', strtotime($post['created_at'])); ?>
-                        </time>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
                 <article class="bg-white rounded-xl shadow-md overflow-hidden">
                     <div class="p-6 md:p-8">
                         <?php if (!empty($post['description'])): ?>
@@ -350,81 +300,36 @@ include 'includes/header.php';
                             }
                             ?>
                         </div>
-                        
-                        <!-- 記事のシェアボタン -->
-                        <div class="mt-8 pt-6 border-t">
-                            <h3 class="text-lg font-bold mb-3">この記事をシェアする</h3>
-                            <div class="flex gap-2">
-                                <a href="#" class="flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
-                                        <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/>
-                                    </svg>
-                                </a>
-                                <a href="#" class="flex items-center justify-center w-10 h-10 bg-blue-400 text-white rounded-full hover:bg-blue-500 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-twitter" viewBox="0 0 16 16">
-                                        <path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334 0-.14 0-.282-.006-.422A6.685 6.685 0 0 0 16 3.542a6.658 6.658 0 0 1-1.889.518 3.301 3.301 0 0 0 1.447-1.817 6.533 6.533 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.325 9.325 0 0 1-6.767-3.429 3.289 3.289 0 0 0 1.018 4.382A3.323 3.323 0 0 1 .64 6.575v.045a3.288 3.288 0 0 0 2.632 3.218 3.203 3.203 0 0 1-.865.115 3.23 3.23 0 0 1-.614-.057 3.283 3.283 0 0 0 3.067 2.277A6.588 6.588 0 0 1 .78 13.58a6.32 6.32 0 0 1-.78-.045A9.344 9.344 0 0 0 5.026 15z"/>
-                                    </svg>
-                                </a>
-                                <a href="#" class="flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-line" viewBox="0 0 16 16">
-                                        <path d="M8 0c4.411 0 8 2.912 8 6.492 0 1.433-.555 2.723-1.715 3.994-1.678 1.932-5.431 4.285-6.285 4.645-.83.35-.734-.197-.696-.413l.003-.018.114-.685c.027-.204.055-.521-.026-.723-.09-.223-.444-.339-.704-.395C2.846 12.39 0 9.701 0 6.492 0 2.912 3.59 0 8 0ZM5.022 7.686H3.497V4.918a.156.156 0 0 0-.155-.156H2.78a.156.156 0 0 0-.156.156v3.486c0 .041.017.08.044.107v.001l.002.002.002.002a.154.154 0 0 0 .108.043h2.242c.086 0 .155-.07.155-.156v-.56a.156.156 0 0 0-.155-.157Zm.791-2.924a.156.156 0 0 0-.156.156v3.486c0 .086.07.155.156.155h.562c.086 0 .155-.07.155-.155V4.918a.156.156 0 0 0-.155-.156h-.562Zm3.863 0a.156.156 0 0 0-.156.156v2.07L7.923 4.832a.17.17 0 0 0-.013-.015v-.001a.139.139 0 0 0-.01-.01l-.003-.003a.092.092 0 0 0-.011-.009h-.001L7.88 4.79l-.003-.002a.029.029 0 0 0-.005-.003l-.008-.005h-.002l-.003-.002-.01-.004-.004-.002a.093.093 0 0 0-.01-.003h-.002l-.003-.001-.009-.002h-.006l-.003-.001h-.004l-.002-.001h-.574a.156.156 0 0 0-.156.155v3.486c0 .086.07.155.156.155h.56c.087 0 .157-.07.157-.155v-2.07l1.6 2.16a.154.154 0 0 0 .039.038l.001.001.01.006.004.002a.066.066 0 0 0 .008.004l.007.003.005.002a.168.168 0 0 0 .01.003h.003a.155.155 0 0 0 .04.006h.56c.087 0 .157-.07.157-.155V4.918a.156.156 0 0 0-.156-.156h-.561Zm3.815.717v-.56a.156.156 0 0 0-.155-.157h-2.242a.155.155 0 0 0-.108.044h-.001l-.001.002-.002.003a.155.155 0 0 0-.044.107v3.486c0 .041.017.08.044.107l.002.003.002.002a.155.155 0 0 0 .108.043h2.242c.086 0 .155-.07.155-.156v-.56a.156.156 0 0 0-.155-.157H11.81v-.589h1.525c.086 0 .155-.07.155-.156v-.56a.156.156 0 0 0-.155-.157H11.81v-.589h1.525c.086 0 .155-.07.155-.156Z"/>
-                                    </svg>
-                                </a>
-                                <a href="#" class="flex items-center justify-center w-10 h-10 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16">
-                                        <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
                     </div>
                 </article>
-                
-                <!-- 著者情報 -->
-                <div class="bg-white rounded-xl shadow-md p-6 mt-8">
-                    <div class="flex items-center gap-4">
-                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold">
-                            A
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold">著者名</h3>
-                            <p class="text-gray-600">技術ブログの管理者。ウェブ開発とプログラミングに関する記事を執筆しています。</p>
-                        </div>
-                    </div>
-                </div>
                 
                 <!-- 関連記事 -->
                 <?php if (!empty($relatedPosts)): ?>
                 <div class="mt-8">
                     <h2 class="text-xl font-bold mb-4">関連記事</h2>
-                    <div class="grid gap-6 md:grid-cols-3">
-                        <?php foreach ($relatedPosts as $related): ?>
-                        <a href="techbrog_detail.php?id=<?php echo $related['id']; ?>" class="bg-white rounded-xl shadow-md overflow-hidden hover-lift">
-                            <div class="aspect-[4/3] relative">
-                                <?php if (!empty($related['image_data'])): ?>
-                                    <img 
-                                        src="image.php?id=<?php echo $related['id']; ?>" 
-                                        alt="関連記事"
-                                        class="w-full h-full object-cover"
-                                    >
-                                <?php else: ?>
-                                    <div class="w-full h-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                                        </svg>
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                        <ul class="divide-y divide-gray-100">
+                            <?php foreach ($relatedPosts as $related): ?>
+                            <li class="p-4 hover:bg-gray-50">
+                                <a href="techbrog_detail.php?id=<?php echo $related['id']; ?>" class="block">
+                                    <h3 class="font-bold text-gray-900 mb-1">
+                                        <?php echo htmlspecialchars($related['title']); ?>
+                                    </h3>
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <time datetime="<?php echo date('Y-m-d', strtotime($related['created_at'])); ?>">
+                                            <?php echo date('Y年m月d日', strtotime($related['created_at'])); ?>
+                                        </time>
+                                        <?php if (!empty($related['category_name'])): ?>
+                                        <span class="mx-2">•</span>
+                                        <span class="text-blue-600">
+                                            <?php echo htmlspecialchars($related['category_name']); ?>
+                                        </span>
+                                        <?php endif; ?>
                                     </div>
-                                <?php endif; ?>
-                            </div>
-                            <div class="p-4">
-                                <h3 class="font-bold line-clamp-2 group-hover:text-blue-600">
-                                    <?php echo htmlspecialchars($related['title']); ?>
-                                </h3>
-                                <time datetime="<?php echo date('Y-m-d', strtotime($related['created_at'])); ?>" class="text-sm text-gray-500">
-                                    <?php echo date('Y年m月d日', strtotime($related['created_at'])); ?>
-                                </time>
-                            </div>
-                        </a>
-                        <?php endforeach; ?>
+                                </a>
+                            </li>
+                            <?php endforeach; ?>
+                        </ul>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -455,22 +360,29 @@ include 'includes/header.php';
                         </svg>
                         最新の記事
                     </h2>
-                    <ul class="space-y-4">
+                    <ul class="divide-y divide-gray-100">
                         <?php foreach ($latestPosts as $latestPost): ?>
-                            <li class="border-b border-gray-100 pb-3 last:border-0">
-                                <a href="techbrog_detail.php?id=<?php echo $latestPost['id']; ?>" class="group">
-                                    <h3 class="font-medium line-clamp-2 group-hover:text-blue-600 transition-colors">
+                            <li class="py-3 first:pt-0 last:pb-0">
+                                <a href="techbrog_detail.php?id=<?php echo $latestPost['id']; ?>" class="block hover:bg-gray-50 -mx-3 px-3 py-2 rounded-md transition-colors">
+                                    <h3 class="font-medium line-clamp-2 text-gray-900 hover:text-blue-600">
                                         <?php echo htmlspecialchars($latestPost['title']); ?>
                                     </h3>
-                                    <time datetime="<?php echo date('Y-m-d', strtotime($latestPost['created_at'])); ?>" class="text-sm text-gray-500">
-                                        <?php echo date('Y年m月d日', strtotime($latestPost['created_at'])); ?>
-                                    </time>
+                                    <div class="flex items-center text-sm text-gray-500 mt-1">
+                                        <time datetime="<?php echo date('Y-m-d', strtotime($latestPost['created_at'])); ?>">
+                                            <?php echo date('Y年m月d日', strtotime($latestPost['created_at'])); ?>
+                                        </time>
+                                        <?php if (!empty($latestPost['category_name'])): ?>
+                                        <span class="mx-2">•</span>
+                                        <span class="text-blue-600">
+                                            <?php echo htmlspecialchars($latestPost['category_name']); ?>
+                                        </span>
+                                        <?php endif; ?>
+                                    </div>
                                 </a>
                             </li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
-                
             </div>
         </div>
     </main>
@@ -556,4 +468,3 @@ include 'includes/header.php';
     </script>
 </body>
 </html>
-

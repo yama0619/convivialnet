@@ -20,12 +20,20 @@ $blog_count_query = "SELECT COUNT(*) as count FROM tecblog";
 $blog_count_result = $conn->query($blog_count_query);
 $blog_count = $blog_count_result->fetch_assoc()['count'];
 
+// 登録ユーザー数を取得
+$user_count_query = "SELECT COUNT(*) as count FROM users";
+$user_count_result = $conn->query($user_count_query);
+$user_count = $user_count_result ? $user_count_result->fetch_assoc()['count'] : 0;
+
 // 最近の活動記録を取得
 $recent_activities_query = "SELECT id, title, created_at FROM posts ORDER BY created_at DESC LIMIT 5";
 $recent_activities_result = $conn->query($recent_activities_query);
 
-// 最近の技術ブログを取得
-$recent_blogs_query = "SELECT id, title, category_id, created_at FROM tecblog ORDER BY created_at DESC LIMIT 5";
+// 最近の技術ブログを取得（カテゴリ名も含める）
+$recent_blogs_query = "SELECT t.id, t.title, t.category_id, t.created_at, bc.category_name 
+                      FROM tecblog t
+                      LEFT JOIN blog_categories bc ON t.category_id = bc.id
+                      ORDER BY t.created_at DESC LIMIT 5";
 $recent_blogs_result = $conn->query($recent_blogs_query);
 
 ?>
@@ -45,6 +53,12 @@ $recent_blogs_result = $conn->query($recent_blogs_query);
         }
         .sidebar {
             background-image: linear-gradient(180deg, #1e40af 0%, #3b82f6 100%);
+        }
+        .line-clamp-1 {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
     </style>
 </head>
@@ -159,7 +173,7 @@ $recent_blogs_result = $conn->query($recent_blogs_query);
                             </div>
                             <div class="ml-4">
                                 <p class="text-gray-500 text-sm">登録ユーザー</p>
-                                <h3 class="text-2xl font-bold">24</h3>
+                                <h3 class="text-2xl font-bold"><?php echo $user_count; ?></h3>
                             </div>
                         </div>
                     </div>
@@ -234,7 +248,7 @@ $recent_blogs_result = $conn->query($recent_blogs_query);
                                                 </td>
                                                 <td class="py-3 text-sm">
                                                     <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-                                                        <?php echo htmlspecialchars($blog['category_id']); ?>
+                                                        <?php echo htmlspecialchars($blog['category_name'] ?? '未分類'); ?>
                                                     </span>
                                                 </td>
                                                 <td class="py-3 text-sm text-gray-500">
@@ -303,4 +317,3 @@ $recent_blogs_result = $conn->query($recent_blogs_query);
     </script>
 </body>
 </html>
-

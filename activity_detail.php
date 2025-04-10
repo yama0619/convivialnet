@@ -11,7 +11,7 @@ if ($id <= 0) {
 }
 
 // 記事データの取得
-$stmt = $conn->prepare("SELECT id, title, description, content, content_html, image_data, image_type, created_at FROM posts WHERE id = ?");
+$stmt = $conn->prepare("SELECT id, title, description, content, content_html, created_at FROM posts WHERE id = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -23,31 +23,6 @@ if (!$result || $result->num_rows === 0) {
 
 $post = $result->fetch_assoc();
 $stmt->close();
-
-// // 関連記事の取得
-// $relatedPosts = [];
-// if (!empty($tags)) {
-//     $tagList = implode("','", array_map(function($tag) use ($conn) {
-//         return $conn->real_escape_string($tag);
-//     }, $tags));
-
-//     $relatedSql = "SELECT id, title, image_data, image_type, created_at FROM posts 
-//                 WHERE id != ? AND (category = ? OR tags LIKE ?) 
-//                 ORDER BY created_at DESC LIMIT 3";
-//     $stmt = $conn->prepare($relatedSql);
-//     $categoryParam = $post['category'];
-//     $tagParam = '%' . implode('%', $tags) . '%';
-//     $stmt->bind_param("iss", $id, $categoryParam, $tagParam);
-//     $stmt->execute();
-//     $relatedResult = $stmt->get_result();
-
-//     if ($relatedResult) {
-//         while ($related = $relatedResult->fetch_assoc()) {
-//             $relatedPosts[] = $related;
-//         }
-//     }
-//     $stmt->close();
-// }
 
 // 最新記事の取得（サイドバー用）
 $latestPostsQuery = "SELECT id, title, created_at FROM posts WHERE id != ? ORDER BY created_at DESC LIMIT 5";
@@ -72,10 +47,15 @@ include 'includes/header.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($post['title']); ?> | 技術ブログ</title>
+    <title><?php echo htmlspecialchars($post['title']); ?> | 活動記録</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        
         /* コードブロックのスタイル */
         pre {
             border-radius: 0.5rem;
@@ -162,15 +142,6 @@ include 'includes/header.php';
             color: #4b5563;
         }
         
-        .article-content img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 0.5rem;
-            margin: 2rem auto;
-            display: block;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        
         .article-content table {
             width: 100%;
             border-collapse: collapse;
@@ -203,11 +174,6 @@ include 'includes/header.php';
             overflow: hidden;
         }
         
-        /* ヒーローセクション */
-        .hero-gradient {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(79, 70, 229, 0.8));
-        }
-        
         /* カスタムスクロールバー */
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
@@ -222,61 +188,44 @@ include 'includes/header.php';
             border-radius: 20px;
         }
         
-        /* アニメーション */
-        .hover-lift {
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .hover-lift:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        
         /* 目次のアクティブ状態 */
         .toc-link.active {
             color: #2563eb;
             font-weight: 600;
         }
+        
+        /* タイトルの装飾 */
+        .article-title {
+            position: relative;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .article-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            border-radius: 2px;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- ヒーローセクション -->
-    <?php if (!empty($post['image_data'])): ?>
-    <div class="relative h-64 md:h-96 overflow-hidden">
-        <img 
-            src="../image.php?id=<?php echo $post['id']; ?>" 
-            alt="<?php echo htmlspecialchars($post['title']); ?>"
-            class="w-full h-full object-cover"
-        >
-        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
-        <div class="absolute inset-0 flex items-center justify-center">
-            <div class="text-center px-4">
-                <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 max-w-4xl mx-auto">
-                    <?php echo htmlspecialchars($post['title']); ?>
-                </h1>
-                
-                <div class="text-white text-sm md:text-base">
-                    <time datetime="<?php echo date('Y-m-d', strtotime($post['created_at'])); ?>">
-                        <?php echo date('Y年m月d日', strtotime($post['created_at'])); ?>
-                    </time>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
-
     <main class="container mx-auto px-4 py-8">
-        <!-- Breadcrumb navigation -->
+        <!-- パンくずナビゲーション -->
         <nav class="flex mb-6 text-sm">
             <ol class="flex items-center space-x-2">
                 <li>
-                    <a href="../home.php" class="text-gray-600 hover:text-gray-900">ホーム</a>
+                    <a href="index.php" class="text-gray-600 hover:text-gray-900">ホーム</a>
                 </li>
                 <li class="flex items-center space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-gray-400">
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
-                    <a href="index.php" class="text-gray-600 hover:text-gray-900">活動記録</a>
+                    <a href="list.php" class="text-gray-600 hover:text-gray-900">活動記録</a>
                 </li>
                 <li class="flex items-center space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-gray-400">
@@ -290,22 +239,24 @@ include 'includes/header.php';
         <div class="flex flex-col lg:flex-row gap-8">
             <!-- 記事本文 -->
             <div class="w-full lg:w-2/3">
-                <?php if (empty($post['image_data'])): ?>
-                <div class="mb-6">
-                    <h1 class="text-3xl md:text-4xl font-bold mb-4"><?php echo htmlspecialchars($post['title']); ?></h1>
-                    
-                    <div class="flex items-center text-gray-600">
-                        <time datetime="<?php echo date('Y-m-d', strtotime($post['created_at'])); ?>">
-                            <?php echo date('Y年m月d日', strtotime($post['created_at'])); ?>
-                        </time>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
                 <article class="bg-white rounded-lg shadow-md overflow-hidden">
                     <div class="p-6 md:p-8">
+                        <!-- 目立つタイトル -->
+                        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 article-title">
+                            <?php echo htmlspecialchars($post['title']); ?>
+                        </h1>
+                        
+                        <div class="flex items-center text-gray-600 mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <time datetime="<?php echo date('Y-m-d', strtotime($post['created_at'])); ?>">
+                                <?php echo date('Y年m月d日', strtotime($post['created_at'])); ?>
+                            </time>
+                        </div>
+                        
                         <?php if (!empty($post['description'])): ?>
-                        <div class="mb-6 text-lg text-gray-700 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                        <div class="mb-8 text-lg text-gray-700 bg-blue-50 p-5 rounded-lg border-l-4 border-blue-500">
                             <?php echo htmlspecialchars($post['description']); ?>
                         </div>
                         <?php endif; ?>
@@ -322,7 +273,7 @@ include 'includes/header.php';
                         </div>
                         
                         <!-- 記事のシェアボタン -->
-                        <div class="mt-8 pt-6 border-t">
+                        <div class="mt-10 pt-6 border-t border-gray-100">
                             <h3 class="text-lg font-bold mb-3">この記事をシェアする</h3>
                             <div class="flex gap-2">
                                 <a href="#" class="flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
@@ -476,4 +427,3 @@ include 'includes/header.php';
     </script>
 </body>
 </html>
-
