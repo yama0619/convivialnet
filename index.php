@@ -446,14 +446,14 @@ include 'includes/header.php';
                                     <?php endif; ?>
                                 </div>
                                 <h3 class="font-bold text-xl mb-3 line-clamp-2 text-gray-900">
-                                    <a href="tech-blog/post.php?id=<?php echo $blog['id']; ?>" class="hover:text-primary-600 transition-colors">
+                                    <a href="techbrog_detail.php?id=<?php echo $blog['id']; ?>" class="hover:text-primary-600 transition-colors">
                                         <?php echo htmlspecialchars($blog['title']); ?>
                                     </a>
                                 </h3>
                                 <p class="text-gray-600 line-clamp-3 mb-4">
                                     <?php echo htmlspecialchars($blog['description']); ?>
                                 </p>
-                                <a href="tech-blog/post.php?id=<?php echo $blog['id']; ?>" class="inline-flex items-center text-primary-600 hover:text-primary-800 font-medium group">
+                                <a href="techbrog_detail.php?id=<?php echo $blog['id']; ?>" class="inline-flex items-center text-primary-600 hover:text-primary-800 font-medium group">
                                     続きを読む
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1 transform transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
