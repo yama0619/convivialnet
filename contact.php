@@ -250,7 +250,7 @@ include 'includes/header.php';
           <div>
             <h3 class="font-medium mb-2">メールでのお問い合わせ</h3>
             <p class="text-gray-600">
-              <a href="mailto:info@example.com" class="text-blue-600 hover:underline">tanimura1041@convivial.ne.jp</a>
+              <a href="mailto:info@convivial.ne.jp" class="text-blue-600 hover:underline">tanimura1041@convivial.ne.jp</a>
             </p>
           </div>
           

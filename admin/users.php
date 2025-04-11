@@ -60,21 +60,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
         $exists = $check_result->fetch_assoc()['count'] > 0;
         
         if (!$exists) {
-            // パスワードハッシュ化
-            $password_hash = password_hash($password, PASSWORD_DEFAULT);
+            // トランザクション開始
+            $conn->begin_transaction();
             
-            // ユーザー追加
-            $insert_query = "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)";
-            $stmt = $conn->prepare($insert_query);
-            $stmt->bind_param("sss", $username, $email, $password_hash);
-            
-            if ($stmt->execute()) {
-                $success_message = "新しいユーザー「" . htmlspecialchars($username) . "」を追加しました。";
-                // ページをリロード
-                header("Location: users.php?success=1");
-                exit();
-            } else {
-                $error_message = "ユーザーの追加に失敗しました: " . $conn->error;
+            try {
+                // パスワードハッシュ化
+                $password_hash = password_hash($password, PASSWORD_DEFAULT);
+                
+                // ユーザー追加
+                $insert_query = "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)";
+                $stmt = $conn->prepare($insert_query);
+                $stmt->bind_param("sss", $username, $email, $password_hash);
+                
+                if ($stmt->execute()) {
+                    // 新しく作成されたユーザーのIDを取得
+                    $new_user_id = $conn->insert_id;
+                    
+                    // user_profilesテーブルにエントリを作成
+                    $profile_query = "INSERT INTO user_profiles (user_id, display_name, show_profile) VALUES (?, ?, 1)";
+                    $profile_stmt = $conn->prepare($profile_query);
+                    $profile_stmt->bind_param("is", $new_user_id, $username);
+                    
+                    if ($profile_stmt->execute()) {
+                        // トランザクションをコミット
+                        $conn->commit();
+                        $success_message = "新しいユーザー「" . htmlspecialchars($username) . "」を追加し、プロフィールも作成しました。";
+                        // ページをリロード
+                        header("Location: users.php?success=1");
+                        exit();
+                    } else {
+                        // プロフィール作成に失敗した場合はロールバック
+                        $conn->rollback();
+                        $error_message = "プロフィールの作成に失敗しました: " . $conn->error;
+                    }
+                } else {
+                    // ユーザー作成に失敗した場合はロールバック
+                    $conn->rollback();
+                    $error_message = "ユーザーの追加に失敗しました: " . $conn->error;
+                }
+            } catch (Exception $e) {
+                // エラーが発生した場合はロールバック
+                $conn->rollback();
+                $error_message = "エラーが発生しました: " . $e->getMessage();
             }
         } else {
             $error_message = "そのメールアドレスは既に使用されています。";
@@ -92,18 +119,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     if ($delete_id == $_SESSION["user_id"]) {
         $error_message = "自分自身を削除することはできません。";
     } else {
-        $delete_sql = "DELETE FROM users WHERE id = $delete_id";
-        if ($conn->query($delete_sql)) {
-            $success_message = "ユーザーを削除しました。";
-            // 現在のページにリダイレクト（GETパラメータを維持）
-            $redirect_url = $_SERVER['PHP_SELF'];
-            if (!empty($_GET)) {
-                $redirect_url .= '?' . http_build_query($_GET);
+        // トランザクション開始
+        $conn->begin_transaction();
+        
+        try {
+            // まず関連するプロフィールを削除
+            $delete_profile_sql = "DELETE FROM user_profiles WHERE user_id = ?";
+            $profile_stmt = $conn->prepare($delete_profile_sql);
+            $profile_stmt->bind_param("i", $delete_id);
+            $profile_stmt->execute();
+            
+            // ユーザーを削除
+            $delete_user_sql = "DELETE FROM users WHERE id = ?";
+            $user_stmt = $conn->prepare($delete_user_sql);
+            $user_stmt->bind_param("i", $delete_id);
+            
+            if ($user_stmt->execute()) {
+                // トランザクションをコミット
+                $conn->commit();
+                $success_message = "ユーザーとプロフィールを削除しました。";
+                // 現在のページにリダイレクト（GETパラメータを維持）
+                $redirect_url = $_SERVER['PHP_SELF'];
+                if (!empty($_GET)) {
+                    $redirect_url .= '?' . http_build_query($_GET);
+                }
+                header("Location: $redirect_url");
+                exit();
+            } else {
+                // 削除に失敗した場合はロールバック
+                $conn->rollback();
+                $error_message = "削除に失敗しました: " . $conn->error;
             }
-            header("Location: $redirect_url");
-            exit();
-        } else {
-            $error_message = "削除に失敗しました: " . $conn->error;
+        } catch (Exception $e) {
+            // エラーが発生した場合はロールバック
+            $conn->rollback();
+            $error_message = "エラーが発生しました: " . $e->getMessage();
         }
     }
 }
@@ -151,52 +201,25 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
+
+</head>
+<style>
         body {
             font-family: 'Noto Sans JP', sans-serif;
         }
         .sidebar {
             background-image: linear-gradient(180deg, #1e40af 0%, #3b82f6 100%);
         }
-    </style>
-</head>
+        .line-clamp-1 {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+</style>
 <body class="bg-gray-50">
     <div class="flex h-screen">
-        <!-- サイドバー -->
-        <div class="sidebar w-64 text-white hidden md:block">
-            <div class="p-6">
-                <h1 class="text-2xl font-bold">管理ページ</h1>
-                <p class="text-sm text-blue-200">Convivial Net</p>
-            </div>
-            <nav class="mt-6">
-                <a href="index.php" class="flex items-center py-3 px-6 hover:bg-blue-800 hover:bg-opacity-30 transition-colors">
-                    <i class="fas fa-tachometer-alt mr-3"></i>
-                    <span>ダッシュボード</span>
-                </a>
-                <a href="activities.php" class="flex items-center py-3 px-6 hover:bg-blue-800 hover:bg-opacity-30 transition-colors">
-                    <i class="fas fa-calendar-alt mr-3"></i>
-                    <span>活動記録管理</span>
-                </a>
-                <a href="blogs.php" class="flex items-center py-3 px-6 hover:bg-blue-800 hover:bg-opacity-30 transition-colors">
-                    <i class="fas fa-newspaper mr-3"></i>
-                    <span>技術ブログ管理</span>
-                </a>
-                <a href="categories.php" class="flex items-center py-3 px-6 hover:bg-blue-800 hover:bg-opacity-30 transition-colors">
-                    <i class="fas fa-tags mr-3"></i>
-                    <span>カテゴリ・タグ管理</span>
-                </a>
-                <a href="users.php" class="flex items-center py-3 px-6 bg-blue-800 bg-opacity-30">
-                    <i class="fas fa-users mr-3"></i>
-                    <span>ユーザー管理</span>
-                </a>
-                <div class="absolute bottom-0 w-64 p-6">
-                    <a href="../logout.php" class="flex items-center text-blue-200 hover:text-white transition-colors">
-                        <i class="fas fa-sign-out-alt mr-3"></i>
-                        <span>ログアウト</span>
-                    </a>
-                </div>
-            </div>
-
+    <?php include 'includes/sidebar.php'; ?>
             <!-- メインコンテンツ -->
             <div class="flex-1 flex flex-col overflow-hidden">
                 <!-- ヘッダー -->
@@ -262,7 +285,7 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
                                 </button>
                                 <a href="users.php" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
                                     リセット
-                                </a
+                                </a>
                             </form>
                         </div>
                     </div>
@@ -472,12 +495,6 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
         </div>
 
         <script>
-            // モバイルメニュートグル
-            document.querySelector('button.md\\:hidden').addEventListener('click', function() {
-                const sidebar = document.querySelector('.sidebar');
-                sidebar.classList.toggle('hidden');
-            });
-
             // モーダル表示
             function showModal(modalId) {
                 document.getElementById(modalId).classList.remove('hidden');
@@ -508,4 +525,3 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
         </script>
     </body>
     </html>
-

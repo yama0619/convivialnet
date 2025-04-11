@@ -6,7 +6,7 @@
                     <address class="not-italic text-gray-600">
                         <p>〒470-0393</p>
                         <p>愛知県豊田市貝津町床立101</p>
-                        <p>メール: tanimura1041@convivial.ne.jp</p>
+                        <p>メール: info@convivial.ne.jp</p>
                     </address>
                 </div>
             </div>

@@ -13,7 +13,7 @@ if ($id <= 0) {
 // 記事データの取得（カテゴリ名も含める）
 $stmt = $conn->prepare("
     SELECT t.id, t.title, t.description, t.content, t.content_html, 
-           t.category_id, t.created_at, bc.category_name 
+           t.category_id, t.created_at, t.user_id, bc.category_name 
     FROM tecblog t
     LEFT JOIN blog_categories bc ON t.category_id = bc.id
     WHERE t.id = ?
@@ -29,6 +29,40 @@ if (!$result || $result->num_rows === 0) {
 
 $post = $result->fetch_assoc();
 $stmt->close();
+
+// 著者情報の取得
+$author_info = null;
+if (!empty($post['user_id'])) {
+    // まずuser_profilesテーブルからプロフィール情報を取得
+    $stmt = $conn->prepare("
+        SELECT id, user_id, display_name, bio, image_data, image_type, show_profile 
+        FROM user_profiles 
+        WHERE user_id = ? AND show_profile = 1
+    ");
+    $stmt->bind_param("i", $post['user_id']);
+    $stmt->execute();
+    $profile_result = $stmt->get_result();
+    if ($profile_result && $profile_result->num_rows > 0) {
+        $author_info = $profile_result->fetch_assoc();
+        $author_info['has_profile'] = true;
+    } else {
+        // プロフィールがない場合はusersテーブルから基本情報を取得
+        $stmt = $conn->prepare("SELECT id, username FROM users WHERE id = ?");
+        $stmt->bind_param("i", $post['user_id']);
+        $stmt->execute();
+        $user_result = $stmt->get_result();
+        if ($user_result && $user_result->num_rows > 0) {
+            $user = $user_result->fetch_assoc();
+            $author_info = [
+                'user_id' => $user['id'],
+                'display_name' => '管理者',
+                'bio' => 'このサイトの管理者です。技術的な内容から運営に関する情報まで、幅広いトピックについて発信しています。',
+                'has_profile' => false
+            ];
+        }
+    }
+    $stmt->close();
+}
 
 // 関連記事の取得
 $relatedPosts = [];
@@ -73,6 +107,9 @@ if ($latestPostsResult) {
 }
 $stmt->close();
 
+// ページタイトルを設定
+$page_title = htmlspecialchars($post['title']);
+
 // ヘッダーの読み込み
 include 'includes/header.php';
 ?>
@@ -82,7 +119,7 @@ include 'includes/header.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($post['title']); ?> | 技術ブログ</title>
+    <title><?php echo $page_title; ?> | 技術ブログ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -209,11 +246,6 @@ include 'includes/header.php';
             overflow: hidden;
         }
         
-        /* ヘッダーセクション */
-        .header-gradient {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-        }
-        
         /* カスタムスクロールバー */
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
@@ -233,30 +265,27 @@ include 'includes/header.php';
             color: #2563eb;
             font-weight: 600;
         }
+        
+        /* タイトルの装飾 */
+        .article-title {
+            position: relative;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .article-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            border-radius: 2px;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- ヘッダーセクション -->
-    <div class="header-gradient text-white shadow-lg">
-        <div class="container mx-auto px-4 py-8">
-            <div class="text-center">
-                <h1 class="text-3xl md:text-4xl font-bold mb-4">
-                    <?php echo htmlspecialchars($post['title']); ?>
-                </h1>
-                <div class="flex flex-wrap items-center justify-center gap-2 mb-4">
-                    <a href="tecblog.php?category_id=<?php echo urlencode($post['category_id']); ?>" class="px-3 py-1 text-sm font-medium bg-blue-600/80 text-white rounded-full hover:bg-blue-700">
-                        <?php echo htmlspecialchars($post['category_name'] ?? '未分類'); ?>
-                    </a>
-                </div>
-                <div class="text-white text-sm md:text-base">
-                    <time datetime="<?php echo date('Y-m-d', strtotime($post['created_at'])); ?>">
-                        <?php echo date('Y年m月d日', strtotime($post['created_at'])); ?>
-                    </time>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <main class="container mx-auto px-4 py-8">
         <!-- パンくずナビゲーション -->
         <nav class="flex mb-6 text-sm">
@@ -282,10 +311,37 @@ include 'includes/header.php';
         <div class="flex flex-col lg:flex-row gap-8">
             <!-- 記事本文 -->
             <div class="w-full lg:w-2/3">
-                <article class="bg-white rounded-xl shadow-md overflow-hidden">
+                <article class="bg-white rounded-lg shadow-md overflow-hidden">
                     <div class="p-6 md:p-8">
+                        <!-- 目立つタイトル -->
+                        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 article-title">
+                            <?php echo htmlspecialchars($post['title']); ?>
+                        </h1>
+                        
+                        <div class="flex items-center mb-6">
+                            <div class="flex items-center text-gray-600 mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <time datetime="<?php echo date('Y-m-d', strtotime($post['created_at'])); ?>">
+                                    <?php echo date('Y年m月d日', strtotime($post['created_at'])); ?>
+                                </time>
+                            </div>
+                            
+                            <?php if (!empty($post['category_name'])): ?>
+                            <div class="flex items-center text-gray-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                                <a href="tecblog.php?category_id=<?php echo urlencode($post['category_id']); ?>" class="text-blue-600 hover:text-blue-800">
+                                    <?php echo htmlspecialchars($post['category_name']); ?>
+                                </a>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        
                         <?php if (!empty($post['description'])): ?>
-                        <div class="mb-6 text-lg text-gray-700 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                        <div class="mb-8 text-lg text-gray-700 bg-blue-50 p-5 rounded-lg border-l-4 border-blue-500">
                             <?php echo htmlspecialchars($post['description']); ?>
                         </div>
                         <?php endif; ?>
@@ -300,18 +356,51 @@ include 'includes/header.php';
                             }
                             ?>
                         </div>
+                        
                     </div>
                 </article>
+                
+                <!-- 著者プロフィール -->
+                <?php if ($author_info): ?>
+                <div class="mt-8">
+                    <h2 class="text-xl font-bold mb-4">この記事の著者</h2>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <div class="p-4 hover:bg-gray-50">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-20 h-20 rounded-full overflow-hidden bg-gray-200">
+                                        <?php if (isset($author_info['has_profile']) && $author_info['has_profile'] && !empty($author_info['image_data'])): ?>
+                                            <img src="data:<?php echo htmlspecialchars($author_info['image_type']); ?>;base64,<?php echo base64_encode($author_info['image_data']); ?>" alt="<?php echo htmlspecialchars($author_info['display_name']); ?>" class="w-full h-full object-cover">
+                                        <?php else: ?>
+                                            <div class="w-full h-full flex items-center justify-center text-gray-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900 mb-1"><?php echo htmlspecialchars($author_info['display_name']); ?></h3>
+                                    <?php if (!empty($author_info['bio'])): ?>
+                                    <p class="text-gray-700"><?php echo nl2br(htmlspecialchars($author_info['bio'])); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
                 
                 <!-- 関連記事 -->
                 <?php if (!empty($relatedPosts)): ?>
                 <div class="mt-8">
                     <h2 class="text-xl font-bold mb-4">関連記事</h2>
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
                         <ul class="divide-y divide-gray-100">
                             <?php foreach ($relatedPosts as $related): ?>
                             <li class="p-4 hover:bg-gray-50">
-                                <a href="techbrog_detail.php?id=<?php echo $related['id']; ?>" class="block">
+                                <a href="techblog_detail.php?id=<?php echo $related['id']; ?>" class="block">
                                     <h3 class="font-bold text-gray-900 mb-1">
                                         <?php echo htmlspecialchars($related['title']); ?>
                                     </h3>
@@ -336,12 +425,12 @@ include 'includes/header.php';
             </div>
             
             <!-- サイドバー -->
-            <div class="w-full lg:w-1/3 space-y-8">
+            <div class="w-full lg:w-1/3 space-y-6">
                 <!-- 目次 -->
-                <div class="bg-white rounded-xl shadow-md p-6 sticky top-20">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-20">
                     <h2 class="text-lg font-bold mb-4 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4  18h7" />
                         </svg>
                         目次
                     </h2>
@@ -353,18 +442,18 @@ include 'includes/header.php';
                 </div>
                 
                 <!-- 最新の記事 -->
-                <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
                     <h2 class="text-lg font-bold mb-4 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
                         最新の記事
                     </h2>
-                    <ul class="divide-y divide-gray-100">
+                    <ul class="space-y-4">
                         <?php foreach ($latestPosts as $latestPost): ?>
-                            <li class="py-3 first:pt-0 last:pb-0">
-                                <a href="techbrog_detail.php?id=<?php echo $latestPost['id']; ?>" class="block hover:bg-gray-50 -mx-3 px-3 py-2 rounded-md transition-colors">
-                                    <h3 class="font-medium line-clamp-2 text-gray-900 hover:text-blue-600">
+                            <li class="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                                <a href="techblog_detail.php?id=<?php echo $latestPost['id']; ?>" class="group">
+                                    <h3 class="font-medium line-clamp-2 group-hover:text-blue-600 transition-colors">
                                         <?php echo htmlspecialchars($latestPost['title']); ?>
                                     </h3>
                                     <div class="flex items-center text-sm text-gray-500 mt-1">

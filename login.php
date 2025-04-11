@@ -3,8 +3,6 @@ session_start();
 // データベース接続
 require 'db.php';
 
-// $conn = new conn("localhost", "root", "yama333", "convivialnet");
-
 $error_message = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -59,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <div class="form-container w-full max-w-md rounded-xl shadow-lg overflow-hidden">
             <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
                 <h1 class="text-2xl font-bold text-center">Convivial Net</h1>
-                <p class="text-center text-blue-100 mt-1">アカウントにログイン</p>
+                <p class="text-center text-blue-100 mt-1">管理者画面にログイン</p>
             </div>
             
             <div class="p-6 md:p-8">
@@ -93,9 +91,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <div>
                         <div class="flex items-center justify-between">
                             <label for="password" class="block text-sm font-medium text-gray-700 mb-1">パスワード</label>
-                            <a href="#" class="text-sm text-blue-600 hover:text-blue-500">
+                            <!-- <a href="#" class="text-sm text-blue-600 hover:text-blue-500">
                                 パスワードをお忘れですか？
-                            </a>
+                            </a> -->
                         </div>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -114,7 +112,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         </div>
                     </div>
                     
-                    <div class="flex items-center">
+                    <!-- <div class="flex items-center">
                         <input 
                             id="remember_me" 
                             name="remember_me" 
@@ -124,7 +122,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         <label for="remember_me" class="ml-2 block text-sm text-gray-700">
                             ログイン状態を保持する
                         </label>
-                    </div>
+                    </div> -->
                     
                     <div>
                         <button 
@@ -136,12 +134,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     </div>
                 </form>
                 
-                <p class="mt-8 text-center text-sm text-gray-600">
+                <!-- <p class="mt-8 text-center text-sm text-gray-600">
                     アカウントをお持ちでないですか？
                     <a href="register.php" class="font-medium text-blue-600 hover:text-blue-500">
                         新規登録
                     </a>
-                </p>
+                </p> -->
             </div>
         </div>
     </div>

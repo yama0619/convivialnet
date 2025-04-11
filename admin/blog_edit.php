@@ -126,42 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="bg-gray-50">
     <div class="flex h-screen">
-        <!-- サイドバー -->
-        <div class="sidebar w-64 text-white hidden md:block">
-            <div class="p-6">
-                <h1 class="text-2xl font-bold">管理ページ</h1>
-                <p class="text-sm text-blue-200">Convivial Net</p>
-            </div>
-            <nav class="mt-6">
-                <a href="index.php" class="flex items-center py-3 px-6 hover:bg-blue-800 hover:bg-opacity-30 transition-colors">
-                    <i class="fas fa-tachometer-alt mr-3"></i>
-                    <span>ダッシュボード</span>
-                </a>
-                <a href="activities.php" class="flex items-center py-3 px-6 bg-blue-800 bg-opacity-30">
-                  <i class="fas fa-calendar-alt mr-3"></i>
-                  <span>活動記録管理</span>
-                </a>
-                <a href="blogs.php" class="flex items-center py-3 px-6 bg-blue-800 bg-opacity-30">
-                    <i class="fas fa-newspaper mr-3"></i>
-                    <span>技術ブログ管理</span>
-                </a>
-                <a href="categories.php" class="flex items-center py-3 px-6 hover:bg-blue-800 hover:bg-opacity-30 transition-colors">
-                    <i class="fas fa-tags mr-3"></i>
-                    <span>カテゴリ・タグ管理</span>
-                </a>
-                <a href="users.php" class="flex items-center py-3 px-6 hover:bg-blue-800 hover:bg-opacity-30 transition-colors">
-                    <i class="fas fa-users mr-3"></i>
-                    <span>ユーザー管理</span>
-                </a>
-            </nav>
-            <div class="absolute bottom-0 w-64 p-6">
-                <a href="../logout.php" class="flex items-center text-blue-200 hover:text-white transition-colors">
-                    <i class="fas fa-sign-out-alt mr-3"></i>
-                    <span>ログアウト</span>
-                </a>
-            </div>
-        </div>
-
+    <?php include 'includes/sidebar.php'; ?>
         <!-- メインコンテンツ -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- ヘッダー -->
@@ -317,12 +282,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script>
-        // モバイルメニュートグル
-        document.querySelector('button.md\\:hidden').addEventListener('click', function() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('hidden');
-        });
-
         // テンプレート選択時の処理
         document.getElementById('content_template').addEventListener('change', function() {
             if (this.value) {

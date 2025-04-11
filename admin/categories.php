@@ -35,7 +35,7 @@ if (!$table_exists) {
 $blog_categories_query = "
     SELECT bc.id, bc.category_name, COUNT(t.id) as count 
     FROM blog_categories bc
-    LEFT JOIN tecblog t ON bc.category_name = t.category_id
+    LEFT JOIN tecblog t ON bc.id = t.category_id
     GROUP BY bc.id, bc.category_name
     ORDER BY bc.category_name
 ";
@@ -249,42 +249,7 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
 </head>
 <body class="bg-gray-50">
     <div class="flex h-screen">
-        <!-- サイドバー -->
-        <div class="sidebar w-64 text-white hidden md:block shadow-lg">
-            <div class="p-6">
-                <h1 class="text-2xl font-bold">管理ページ</h1>
-                <p class="text-sm text-blue-200 mt-1">Convivial Net</p>
-            </div>
-            <nav class="mt-6">
-                <a href="index.php" class="flex items-center py-3 px-6 hover:bg-blue-800 hover:bg-opacity-30 transition-all">
-                    <i class="fas fa-tachometer-alt mr-3"></i>
-                    <span>ダッシュボード</span>
-                </a>
-                <a href="activities.php" class="flex items-center py-3 px-6 bg-blue-800 bg-opacity-30">
-                    <i class="fas fa-calendar-alt mr-3"></i>
-                    <span>活動記録管理</span>
-                </a>
-                <a href="blogs.php" class="flex items-center py-3 px-6 hover:bg-blue-800 hover:bg-opacity-30 transition-all">
-                    <i class="fas fa-newspaper mr-3"></i>
-                    <span>技術ブログ管理</span>
-                </a>
-                <a href="categories.php" class="flex items-center py-3 px-6 bg-blue-800 bg-opacity-30 border-l-4 border-white">
-                    <i class="fas fa-tags mr-3"></i>
-                    <span>カテゴリ・タグ管理</span>
-                </a>
-                <a href="users.php" class="flex items-center py-3 px-6 hover:bg-blue-800 hover:bg-opacity-30 transition-all">
-                    <i class="fas fa-users mr-3"></i>
-                    <span>ユーザー管理</span>
-                </a>
-            </nav>
-            <div class="absolute bottom-0 w-64 p-6">
-                <a href="../logout.php" class="flex items-center text-blue-200 hover:text-white transition-all">
-                    <i class="fas fa-sign-out-alt mr-3"></i>
-                    <span>ログアウト</span>
-                </a>
-            </div>
-        </div>
-
+    <?php include 'includes/sidebar.php'; ?>
         <!-- メインコンテンツ -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- ヘッダー -->
@@ -424,7 +389,7 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     <a 
-                                                        href="blogs.php?category_id=<?php echo urlencode($category['category_name']); ?>" 
+                                                        href="blogs.php?search=&category_id=<?php echo urlencode($category['id']); ?>" 
                                                         class="text-gray-600 hover:text-gray-900 transition-all"
                                                         title="このカテゴリの記事を表示"
                                                     >
@@ -634,12 +599,6 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
     </div>
 
     <script>
-        // モバイルメニュートグル
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('hidden');
-        });
-
         // ユーザーメニュートグル
         document.getElementById('userMenuButton').addEventListener('click', function() {
             const menu = document.getElementById('userMenu');
