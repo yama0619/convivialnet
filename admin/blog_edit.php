@@ -66,20 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Markdownをパースしてコンテンツを生成
     $content_html = $parsedown->text($content);
     
-    // 画像が更新された場合
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        // 画像ファイルを読み込む
-        $imageData = file_get_contents($_FILES['image']['tmp_name']);
-        $imageType = $_FILES['image']['type'];
-        
-        // 画像も含めて更新
-        $stmt = $conn->prepare("UPDATE tecblog SET title = ?, description = ?, content = ?, content_html = ?, image_data = ?, image_type = ?, category_id = ? WHERE id = ?");
-        $stmt->bind_param("ssssssii", $title, $description, $content, $content_html, $imageData, $imageType, $category_id, $id);
-    } else {
         // 画像以外を更新
-        $stmt = $conn->prepare("UPDATE tecblog SET title = ?, description = ?, content = ?, content_html = ?, category_id = ? WHERE id = ?");
-        $stmt->bind_param("ssssii", $title, $description, $content, $content_html, $category_id, $id);
-    }
+    $stmt = $conn->prepare("UPDATE tecblog SET title = ?, description = ?, content = ?, content_html = ?, category_id = ? WHERE id = ?");
+    $stmt->bind_param("ssssii", $title, $description, $content, $content_html, $category_id, $id);
     
     if ($stmt->execute()) {
         $success_message = "記事が正常に更新されました。";

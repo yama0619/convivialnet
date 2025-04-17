@@ -262,7 +262,7 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
                         <h2 class="text-xl font-semibold text-gray-800">技術ブログカテゴリ管理</h2>
                     </div>
                     <div class="flex items-center">
-                        <a href="../tech-blog/index.php" class="text-blue-600 hover:text-blue-800 mr-4 flex items-center transition-all" target="_blank">
+                        <a href="../techbrog.php" class="text-blue-600 hover:text-blue-800 mr-4 flex items-center transition-all" target="_blank">
                             <i class="fas fa-external-link-alt mr-1"></i>
                             <span>ブログを表示</span>
                         </a>

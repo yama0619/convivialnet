@@ -210,7 +210,7 @@ $recent_blogs_result = $conn->query($recent_blogs_query);
                                         <?php while ($blog = $recent_blogs_result->fetch_assoc()): ?>
                                             <tr class="border-t border-gray-100">
                                                 <td class="py-3 text-sm">
-                                                    <div class="line-clamp-1"><?php echo htmlspecialchars($blog['title']); ?></div>
+                                                    <div class="w-32 line-clamp-1"><?php echo htmlspecialchars($blog['title']); ?></div>
                                                 </td>
                                                 <td class="py-3 text-sm">
                                                     <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
