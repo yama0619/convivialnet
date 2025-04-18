@@ -208,7 +208,7 @@ $stmt->close();
                   <h2 class="text-xl font-semibold text-gray-800">技術ブログ記事の追加</h2>
               </div>
               <div class="flex items-center">
-                  <a href="../techbrog.php" class="text-blue-600 hover:text-blue-800 mr-4" target="_blank">
+                  <a href="../techblog.php" class="text-blue-600 hover:text-blue-800 mr-4" target="_blank">
                       <i class="fas fa-external-link-alt mr-1"></i>
                       ブログを表示
                   </a>

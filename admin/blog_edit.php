@@ -128,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <h2 class="text-xl font-semibold text-gray-800">技術ブログ記事の編集</h2>
                     </div>
                     <div class="flex items-center">
-                        <a href="../techbrog_detail.php?id=<?php echo $id; ?>" class="text-blue-600 hover:text-blue-800 mr-4" target="_blank">
+                        <a href="../techblog_detail.php?id=<?php echo $id; ?>" class="text-blue-600 hover:text-blue-800 mr-4" target="_blank">
                             <i class="fas fa-external-link-alt mr-1"></i>
                             記事を表示
                         </a>

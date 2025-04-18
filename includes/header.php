@@ -20,7 +20,7 @@ if (!isset($page_title)) {
                             </a>
                         </li>
                         <li>
-                            <a href="techbrog.php" class="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                            <a href="techblog.php" class="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
                                 技術ブログ
                             </a>
                         </li>
@@ -57,7 +57,7 @@ if (!isset($page_title)) {
                     </a>
                 </li>
                 <li>
-                    <a href="techbrog.php" class="block py-2 text-sm font-medium text-gray-900 hover:text-blue-600">
+                    <a href="techblog.php" class="block py-2 text-sm font-medium text-gray-900 hover:text-blue-600">
                         技術ブログ
                     </a>
                 </li>

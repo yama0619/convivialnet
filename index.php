@@ -212,7 +212,7 @@ include 'includes/header.php';
                     <a href="#about" class="px-8 py-4 bg-white text-primary-700 rounded-full font-medium hover:bg-primary-50 transition-all shadow-lg hover:shadow-xl">
                         詳しく知る
                     </a>
-                    <a href="techbrog.php" class="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-medium hover:bg-white/10 transition-all">
+                    <a href="techblog.php" class="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-medium hover:bg-white/10 transition-all">
                         技術ブログを見る
                     </a>
                 </div>
@@ -319,7 +319,7 @@ include 'includes/header.php';
                         </li>
                     </ul>
                     
-                    <a href="techbrog.php" class="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-full font-medium hover:bg-primary-700 transition-all shadow-md hover:shadow-lg">
+                    <a href="techblog.php" class="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-full font-medium hover:bg-primary-700 transition-all shadow-md hover:shadow-lg">
                         技術ブログを見る
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -446,14 +446,14 @@ include 'includes/header.php';
                                     <?php endif; ?>
                                 </div>
                                 <h3 class="font-bold text-xl mb-3 line-clamp-2 text-gray-900">
-                                    <a href="techbrog_detail.php?id=<?php echo $blog['id']; ?>" class="hover:text-primary-600 transition-colors">
+                                    <a href="techblog_detail.php?id=<?php echo $blog['id']; ?>" class="hover:text-primary-600 transition-colors">
                                         <?php echo htmlspecialchars($blog['title']); ?>
                                     </a>
                                 </h3>
                                 <p class="text-gray-600 line-clamp-3 mb-4">
                                     <?php echo htmlspecialchars($blog['description']); ?>
                                 </p>
-                                <a href="techbrog_detail.php?id=<?php echo $blog['id']; ?>" class="inline-flex items-center text-primary-600 hover:text-primary-800 font-medium group">
+                                <a href="techblog_detail.php?id=<?php echo $blog['id']; ?>" class="inline-flex items-center text-primary-600 hover:text-primary-800 font-medium group">
                                     続きを読む
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1 transform transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -473,7 +473,7 @@ include 'includes/header.php';
             </div>
             
             <div class="text-center mt-16">
-                <a href="techbrog.php" class="inline-flex items-center px-8 py-4 bg-white text-primary-700 rounded-full font-medium hover:bg-primary-50 transition-all shadow-lg hover:shadow-xl border border-primary-100">
+                <a href="techblog.php" class="inline-flex items-center px-8 py-4 bg-white text-primary-700 rounded-full font-medium hover:bg-primary-50 transition-all shadow-lg hover:shadow-xl border border-primary-100">
                     すべての技術ブログを見る
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />

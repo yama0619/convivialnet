@@ -240,7 +240,7 @@ include 'includes/header.php';
                             <ul class="divide-y divide-gray-100">
                                 <?php foreach ($latesttecblog as $post): ?>
                                 <li class="py-2">
-                                    <a href="techbrog_detail.php?id=<?php echo $post['id']; ?>" class="block">
+                                    <a href="techblog_detail.php?id=<?php echo $post['id']; ?>" class="block">
                                         <p class="text-sm font-medium text-gray-800 line-clamp-2">
                                             <?php echo htmlspecialchars($post['title']); ?>
                                         </p>
@@ -308,7 +308,7 @@ include 'includes/header.php';
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     <?php while ($row = $result->fetch_assoc()): ?>
-                                    <tr class="table-row hover:bg-gray-50 cursor-pointer" onclick="window.location='techbrog_detail.php?id=<?php echo $row['id']; ?>'">
+                                    <tr class="table-row hover:bg-gray-50 cursor-pointer" onclick="window.location='techblog_detail.php?id=<?php echo $row['id']; ?>'">
                                         <td class="px-6 py-4">
                                             <div class="text-sm font-medium text-gray-900 line-clamp-2">
                                                 <?php echo htmlspecialchars($row['title']); ?>
