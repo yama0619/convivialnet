@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $image_type = null;
             
             if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] == 0) {
-                $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+                $allowed = ['jpg', 'jpeg', 'png'];
                 $filename = $_FILES['profile_image']['name'];
                 $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
                 
@@ -63,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $image_data = file_get_contents($_FILES['profile_image']['tmp_name']);
                     $image_type = $_FILES['profile_image']['type'];
                 } else {
-                    $error = "許可されていないファイル形式です。JPG, JPEG, PNG, GIF のみ許可されています。";
+                    $error = "許可されていないファイル形式です。JPG, PNG のみ許可されています。";
                 }
             } elseif ($profile) {
                 // 既存の画像を保持
@@ -222,7 +222,7 @@ $page_title = "プロフィール管理";
                                             画像を変更
                                             <input id="profile_image" name="profile_image" type="file" class="hidden" accept="image/*">
                                         </label>
-                                        <p class="text-xs text-gray-500 mt-1">JPG, PNG, GIF (最大2MB)</p>
+                                        <p class="text-xs text-gray-500 mt-1">JPG, PNG</p>
                                     </div>
                                 </div>
                                 

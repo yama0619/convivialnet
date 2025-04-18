@@ -75,10 +75,10 @@ ConvivialNetメンバー〇名
 ### 中見出し(節)
 #### 小見出し(項)
 
-```python:test.py
+```python
 # Pythonコードの例
 def hello_world():
-    print("Hello, World!")
+    print(\"Hello, World!\")
 ```
 
 Markdownの記法で検索してみてね!
