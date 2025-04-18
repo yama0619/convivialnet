@@ -11,7 +11,7 @@ $latestActivitiesResult = $conn->query($latestActivitiesQuery);
 
 // 最新の技術ブログ記事を取得（3件）
 $latestBlogQuery = "SELECT id, title, description, category_id, created_at 
-                   FROM tecblog 
+                   FROM techblog 
                    ORDER BY created_at DESC 
                    LIMIT 3";
 $latestBlogResult = $conn->query($latestBlogQuery);

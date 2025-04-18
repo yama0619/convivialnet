@@ -24,7 +24,7 @@ if (!$table_exists) {
     if ($conn->query($create_table_query) === TRUE) {
         // 既存のカテゴリをインポート
         $import_query = "INSERT IGNORE INTO blog_categories (category_name) 
-                         SELECT DISTINCT category_id FROM tecblog WHERE category_id IS NOT NULL AND category_id != ''";
+                         SELECT DISTINCT category_id FROM techblog WHERE category_id IS NOT NULL AND category_id != ''";
         $conn->query($import_query);
     } else {
         $error_message = "カテゴリテーブルの作成に失敗しました: " . $conn->error;
@@ -35,7 +35,7 @@ if (!$table_exists) {
 $blog_categories_query = "
     SELECT bc.id, bc.category_name, COUNT(t.id) as count 
     FROM blog_categories bc
-    LEFT JOIN tecblog t ON bc.id = t.category_id
+    LEFT JOIN techblog t ON bc.id = t.category_id
     GROUP BY bc.id, bc.category_name
     ORDER BY bc.category_name
 ";
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rename_category'])) {
             $stmt->execute();
             
             // 記事テーブルの更新
-            $update_posts_query = "UPDATE tecblog SET category_id = ? WHERE category_id = ?";
+            $update_posts_query = "UPDATE techblog SET category_id = ? WHERE category_id = ?";
             $stmt = $conn->prepare($update_posts_query);
             $stmt->bind_param("ss", $new_name, $old_name);
             $stmt->execute();
@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_category'])) {
             $stmt->execute();
             
             // 記事のカテゴリを空にする（記事自体は削除しない）
-            $update_posts_query = "UPDATE tecblog SET category_id = '' WHERE category_id = ?";
+            $update_posts_query = "UPDATE techblog SET category_id = '' WHERE category_id = ?";
             $stmt = $conn->prepare($update_posts_query);
             $stmt->bind_param("s", $category_name);
             $stmt->execute();
@@ -455,7 +455,7 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
                             <div class="ml-4">
                                 <h3 class="text-lg font-semibold text-gray-900">総記事数</h3>
                                 <?php
-                                    $total_posts_query = "SELECT COUNT(*) as count FROM tecblog";
+                                    $total_posts_query = "SELECT COUNT(*) as count FROM techblog";
                                     $total_posts_result = $conn->query($total_posts_query);
                                     $total_posts = $total_posts_result ? $total_posts_result->fetch_assoc()['count'] : 0;
                                 ?>

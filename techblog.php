@@ -13,7 +13,7 @@ $offset = ($page - 1) * $records_per_page;
 
 // クエリの構築
 $sql = "SELECT t.id, t.title, t.description, t.category_id, t.created_at, bc.category_name 
-        FROM tecblog t 
+        FROM techblog t 
         LEFT JOIN blog_categories bc ON t.category_id = bc.id 
         WHERE 1=1";
 
@@ -41,7 +41,7 @@ $total_pages = ceil($total_records / $records_per_page);
 // カテゴリーの取得（記事数も含む）
 $categoriesQuery = "SELECT bc.id, bc.category_name, COUNT(t.id) as post_count 
                    FROM blog_categories bc
-                   LEFT JOIN tecblog t ON bc.id = t.category_id
+                   LEFT JOIN techblog t ON bc.id = t.category_id
                    GROUP BY bc.id, bc.category_name
                    ORDER BY bc.category_name";
 $categoriesResult = $conn->query($categoriesQuery);
@@ -53,15 +53,15 @@ if ($categoriesResult) {
 }
 
 // 最新記事の取得（サイドバー用）
-$latesttecblogQuery = "SELECT t.id, t.title, t.created_at, bc.category_name 
-                      FROM tecblog t
+$latesttechblogQuery = "SELECT t.id, t.title, t.created_at, bc.category_name 
+                      FROM techblog t
                       LEFT JOIN blog_categories bc ON t.category_id = bc.id
                       ORDER BY t.created_at DESC LIMIT 5";
-$latesttecblogResult = $conn->query($latesttecblogQuery);
-$latesttecblog = [];
-if ($latesttecblogResult) {
-    while ($post = $latesttecblogResult->fetch_assoc()) {
-        $latesttecblog[] = $post;
+$latesttechblogResult = $conn->query($latesttechblogQuery);
+$latesttechblog = [];
+if ($latesttechblogResult) {
+    while ($post = $latesttechblogResult->fetch_assoc()) {
+        $latesttechblog[] = $post;
     }
 }
 
@@ -165,7 +165,7 @@ include 'includes/header.php';
                 
                 <!-- 小さい検索バー -->
                 <div class="w-full md:w-auto">
-                    <form action="tecblog.php" method="GET" class="relative flex">
+                    <form action="techblog.php" method="GET" class="relative flex">
                         <input 
                             type="text" 
                             name="search" 
@@ -214,7 +214,7 @@ include 'includes/header.php';
                         <div class="p-4">
                             <ul class="space-y-2">
                                 <li>
-                                    <a href="tecblog.php" class="flex justify-between items-center px-3 py-2 rounded-md <?php echo empty($categoryFilter) ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'; ?>">
+                                    <a href="techblog.php" class="flex justify-between items-center px-3 py-2 rounded-md <?php echo empty($categoryFilter) ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'; ?>">
                                         <span>すべてのカテゴリ</span>
                                         <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"><?php echo $total_records; ?></span>
                                     </a>
@@ -238,7 +238,7 @@ include 'includes/header.php';
                         </div>
                         <div class="p-4">
                             <ul class="divide-y divide-gray-100">
-                                <?php foreach ($latesttecblog as $post): ?>
+                                <?php foreach ($latesttechblog as $post): ?>
                                 <li class="py-2">
                                     <a href="techblog_detail.php?id=<?php echo $post['id']; ?>" class="block">
                                         <p class="text-sm font-medium text-gray-800 line-clamp-2">
@@ -421,7 +421,7 @@ include 'includes/header.php';
                         </svg>
                         <h2 class="text-xl font-bold text-gray-700 mb-2">記事が見つかりませんでした</h2>
                         <p class="text-gray-500 mb-6">検索条件を変更して、もう一度お試しください。</p>
-                        <a href="tecblog.php" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md">
+                        <a href="techblog.php" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md">
                             すべての記事を表示
                         </a>
                     </div>

@@ -6,7 +6,7 @@ require 'db.php';
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if ($id <= 0) {
-    header("Location: tecblog.php");
+    header("Location: techblog.php");
     exit;
 }
 
@@ -14,7 +14,7 @@ if ($id <= 0) {
 $stmt = $conn->prepare("
     SELECT t.id, t.title, t.description, t.content, t.content_html, 
            t.category_id, t.created_at, t.user_id, bc.category_name 
-    FROM tecblog t
+    FROM techblog t
     LEFT JOIN blog_categories bc ON t.category_id = bc.id
     WHERE t.id = ?
 ");
@@ -23,7 +23,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if (!$result || $result->num_rows === 0) {
-    header("Location: tecblog.php");
+    header("Location: techblog.php");
     exit;
 }
 
@@ -69,7 +69,7 @@ $relatedPosts = [];
 if (!empty($post['category_id'])) {
     $relatedSql = "
         SELECT t.id, t.title, t.created_at, bc.category_name 
-        FROM tecblog t
+        FROM techblog t
         LEFT JOIN blog_categories bc ON t.category_id = bc.id
         WHERE t.id != ? AND t.category_id = ? 
         ORDER BY t.created_at DESC LIMIT 3
@@ -90,7 +90,7 @@ if (!empty($post['category_id'])) {
 // 最新記事の取得（サイドバー用）
 $latestPostsQuery = "
     SELECT t.id, t.title, t.created_at, bc.category_name 
-    FROM tecblog t
+    FROM techblog t
     LEFT JOIN blog_categories bc ON t.category_id = bc.id
     WHERE t.id != ? 
     ORDER BY t.created_at DESC LIMIT 5
@@ -297,7 +297,7 @@ include 'includes/header.php';
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-gray-400">
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
-                    <a href="tecblog.php" class="text-gray-600 hover:text-gray-900">技術ブログ</a>
+                    <a href="techblog.php" class="text-gray-600 hover:text-gray-900">技術ブログ</a>
                 </li>
                 <li class="flex items-center space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-gray-400">
@@ -333,7 +333,7 @@ include 'includes/header.php';
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                 </svg>
-                                <a href="tecblog.php?category_id=<?php echo urlencode($post['category_id']); ?>" class="text-blue-600 hover:text-blue-800">
+                                <a href="techblog.php?category_id=<?php echo urlencode($post['category_id']); ?>" class="text-blue-600 hover:text-blue-800">
                                     <?php echo htmlspecialchars($post['category_name']); ?>
                                 </a>
                             </div>

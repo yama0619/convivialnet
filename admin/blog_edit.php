@@ -24,10 +24,10 @@ if ($id <= 0) {
 
 // 既存のデータを取得
 $stmt = $conn->prepare("
-    SELECT tecblog.title, tecblog.description, tecblog.content, tecblog.content_html, tecblog.category_id, blog_categories.category_name
-    FROM tecblog
-    LEFT JOIN blog_categories ON tecblog.category_id = blog_categories.id
-    WHERE tecblog.id = ?
+    SELECT techblog.title, techblog.description, techblog.content, techblog.content_html, techblog.category_id, blog_categories.category_name
+    FROM techblog
+    LEFT JOIN blog_categories ON techblog.category_id = blog_categories.id
+    WHERE techblog.id = ?
 ");
 $stmt->bind_param("i", $id);
 $stmt->execute();
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $content_html = $parsedown->text($content);
     
         // 画像以外を更新
-    $stmt = $conn->prepare("UPDATE tecblog SET title = ?, description = ?, content = ?, content_html = ?, category_id = ? WHERE id = ?");
+    $stmt = $conn->prepare("UPDATE techblog SET title = ?, description = ?, content = ?, content_html = ?, category_id = ? WHERE id = ?");
     $stmt->bind_param("ssssii", $title, $description, $content, $content_html, $category_id, $id);
     
     if ($stmt->execute()) {

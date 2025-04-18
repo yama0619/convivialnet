@@ -148,7 +148,7 @@ $user_id = $_SESSION["user_id"];
 $content_html = $parsedown->text($content);
 
 // データベースに保存
-$stmt = $conn->prepare("INSERT INTO tecblog (title, description, content, content_html, category_id, user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
+$stmt = $conn->prepare("INSERT INTO techblog (title, description, content, content_html, category_id, user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
 
 $stmt->bind_param("ssssii", $title, $description, $content, $content_html, $category_id, $user_id);
 

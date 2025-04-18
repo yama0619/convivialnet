@@ -21,10 +21,10 @@ $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : '';
 
 // クエリの構築
 $sql = "SELECT t.id, t.title, t.description, t.category_id, t.created_at, bc.category_name 
-        FROM tecblog t 
+        FROM techblog t 
         LEFT JOIN blog_categories bc ON t.category_id = bc.id 
         WHERE 1=1";
-$count_sql = "SELECT COUNT(*) as total FROM tecblog t WHERE 1=1";
+$count_sql = "SELECT COUNT(*) as total FROM techblog t WHERE 1=1";
 
 if (!empty($search)) {
     $search_term = '%' . $conn->real_escape_string($search) . '%';
@@ -58,7 +58,7 @@ if ($categories_result) {
 // 削除処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $delete_id = (int)$_POST['delete_id'];
-    $delete_sql = "DELETE FROM tecblog WHERE id = $delete_id";
+    $delete_sql = "DELETE FROM techblog WHERE id = $delete_id";
     if ($conn->query($delete_sql)) {
         $success_message = "技術ブログ記事を削除しました。";
         // 現在のページにリダイレクト（GETパラメータを維持）

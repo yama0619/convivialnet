@@ -16,7 +16,7 @@ $activity_count_result = $conn->query($activity_count_query);
 $activity_count = $activity_count_result->fetch_assoc()['count'];
 
 // 技術ブログの総数を取得
-$blog_count_query = "SELECT COUNT(*) as count FROM tecblog";
+$blog_count_query = "SELECT COUNT(*) as count FROM techblog";
 $blog_count_result = $conn->query($blog_count_query);
 $blog_count = $blog_count_result->fetch_assoc()['count'];
 
@@ -31,7 +31,7 @@ $recent_activities_result = $conn->query($recent_activities_query);
 
 // 最近の技術ブログを取得（カテゴリ名も含める）
 $recent_blogs_query = "SELECT t.id, t.title, t.category_id, t.created_at, bc.category_name 
-                      FROM tecblog t
+                      FROM techblog t
                       LEFT JOIN blog_categories bc ON t.category_id = bc.id
                       ORDER BY t.created_at DESC LIMIT 5";
 $recent_blogs_result = $conn->query($recent_blogs_query);
