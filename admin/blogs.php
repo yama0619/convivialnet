@@ -229,7 +229,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
                                             </td>
                                             <td class="p-4 text-sm">
                                                 <div class="flex space-x-2">
-                                                    <a href="../techbrog_detail.php?id=<?php echo $row['id']; ?>" class="text-gray-600 hover:text-gray-900" target="_blank" title="表示">
+                                                    <a href="../techblog_detail.php?id=<?php echo $row['id']; ?>" class="text-gray-600 hover:text-gray-900" target="_blank" title="表示">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     <a href="blog_edit.php?id=<?php echo $row['id']; ?>" class="text-blue-600 hover:text-blue-800" title="編集">
