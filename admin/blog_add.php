@@ -115,6 +115,25 @@ $categories[] = $category;
 }
 }
 
+// user_idの取得
+$session_user_id = $_SESSION["user_id"];
+$profile_query = "SELECT id FROM user_profiles WHERE user_id = ?";
+$profile_stmt = $conn->prepare($profile_query);
+$profile_stmt->bind_param("i", $session_user_id);
+$profile_stmt->execute();
+$profile_result = $profile_stmt->get_result();
+
+if ($profile_result && $profile_result->num_rows > 0) {
+    $profile_data = $profile_result->fetch_assoc();
+    $user_id = $profile_data['id'];
+} else {
+    // プロフィールが見つからない場合はセッションのuser_idを使用
+    $user_id = $session_user_id;
+    // エラーログに記録
+    error_log("ユーザープロフィールが見つかりません。user_id: $session_user_id");
+}
+$profile_stmt->close();
+
 
 // フォーム送信時の処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -122,6 +141,8 @@ $title = $_POST['title'] ?? '';
 $description = $_POST['description'] ?? '';
 $content = $_POST['content'] ?? '';
 $category_id = $_POST['category_id'] ?? '';
+$user_id = $_SESSION["user_id"];
+
 
 // Markdownをパースしてコンテンツを生成
 $content_html = $parsedown->text($content);
@@ -129,7 +150,7 @@ $content_html = $parsedown->text($content);
 // データベースに保存
 $stmt = $conn->prepare("INSERT INTO tecblog (title, description, content, content_html, category_id, user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
 
-$stmt->bind_param("ssssii", $title, $description, $content, $content_html, $category_id, $user_id,);
+$stmt->bind_param("ssssii", $title, $description, $content, $content_html, $category_id, $user_id);
 
 if ($stmt->execute()) {
 $success_message = "技術ブログ記事が正常に追加されました。";
