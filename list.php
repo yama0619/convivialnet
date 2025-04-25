@@ -98,6 +98,17 @@ include 'includes/header.php';
     }
   </style>
 </head>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PH4QLF887P"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-PH4QLF887P');
+</script>
+
 <body class="bg-gray-50">
   <main class="container mx-auto px-4 py-8">
     <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
