@@ -19,7 +19,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <div class="sidebar w-64 text-white hidden md:block bg-blue-800">
     <div class="p-6">
         <h1 class="text-2xl font-bold">管理ページ</h1>
-        <p class="text-sm text-blue-200">Convivial Net</p>
+        <p class="text-sm text-blue-200">ConvivialNet</p>
     </div>
     <nav class="mt-6">
         <a href="index.php" class="flex items-center py-3 px-6 <?php echo ($current_page == 'index.php') ? 'bg-blue-800 bg-opacity-30' : 'hover:bg-blue-800 hover:bg-opacity-30 transition-colors'; ?>">
