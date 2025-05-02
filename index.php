@@ -279,8 +279,8 @@ include 'includes/header.php';
                     <div class="absolute inset-0 bg-gradient-to-r from-primary-500 to-emerald-500 rounded-2xl transform rotate-3 scale-105 opacity-20"></div>
                     <div class="relative bg-white p-1 rounded-2xl shadow-xl">
                         <div class="aspect-[4/3] rounded-xl overflow-hidden bg-gradient-to-r from-primary-500 to-emerald-500">
-                            <!-- 画像を表示 -->
-                            <img src="images/sava.jpg" alt="サーバールーム" class="w-full h-full object-cover" />
+                            <!-- 画像を表示 - sava.jpgからlogo.pngに変更 -->
+                            <img src="images/logo.png" alt="ConvivialNet ロゴ" class="w-full h-full object-cover" />
                         </div>
                     </div>
                 </div>
@@ -312,7 +312,7 @@ include 'includes/header.php';
                                 </svg>
                             </div>
                             <div>
-                                <span class="font-medium text-gray-900">外部団体とのトランジット</span>
+                                <span class="font-medium text-gray-900">外部団体とピアリング</span>
                                 <p class="mt-1 text-gray-600">他大学や企業と連携し、実際のインターネットに接続するための技術交流を行います。</p>
                             </div>
                         </li>
@@ -320,22 +320,21 @@ include 'includes/header.php';
                             <div class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 flex items-center justify-center mt-1 mr-3">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary-600" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <div>
-                                <span class="font-medium text-gray-900">各種コンテストへの参加</span>
-                                <p class="mt-1 text-gray-600">SECCON、ICTトラブルシューティングコンテストなど、技術力を競う大会に積極的に参加しています。</p>
-                            </div>
-                        </li>
-                    </ul>
-                    
-                    <a href="techblog.php" class="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-full font-medium hover:bg-primary-700 transition-all shadow-md hover:shadow-lg">
-                        技術ブログを見る
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                    </a>
-                </div>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-900">各種コンテストへの参加</span>
+                            <p class="mt-1 text-gray-600">SECCON、ICTトラブルシューティングコンテストなど、技術力を競う大会に積極的に参加しています。</p>
+                        </div>
+                    </li>
+                </ul>
+                
+                <a href="techblog.php" class="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-full font-medium hover:bg-primary-700 transition-all shadow-md hover:shadow-lg">
+                    技術ブログを見る
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </a>
             </div>
         </div>
     </section>

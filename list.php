@@ -2,6 +2,69 @@
 // データベース接続
 require 'db.php';
 
+// AJAXリクエストの処理（もっと見るボタン用）
+if (isset($_GET['ajax']) && $_GET['ajax'] == 'load_more') {
+    // パラメータの取得
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 5;
+    $searchQuery = isset($_GET['search']) ? $_GET['search'] : '';
+
+    // オフセットの計算
+    $offset = ($page - 1) * $limit;
+
+    // メインクエリの構築
+    $sql = "SELECT id, title, description, participants, created_at, 
+            CASE WHEN image_data IS NOT NULL THEN 1 ELSE 0 END as has_image 
+            FROM posts";
+
+    // 検索条件がある場合
+    if (!empty($searchQuery)) {
+        $sql .= " WHERE title LIKE '%" . $conn->real_escape_string($searchQuery) . "%' 
+                  OR description LIKE '%" . $conn->real_escape_string($searchQuery) . "%'";
+    }
+
+    $sql .= " ORDER BY created_at DESC LIMIT $limit OFFSET $offset";
+
+    // クエリの実行
+    $result = $conn->query($sql);
+
+    // エラーチェック
+    if (!$result) {
+        header('Content-Type: application/json');
+        echo json_encode(['error' => 'クエリエラー: ' . $conn->error]);
+        exit;
+    }
+
+    // 総件数を取得して最後のページかどうかを判定
+    $countSql = "SELECT COUNT(*) as total FROM posts";
+    if (!empty($searchQuery)) {
+        $countSql .= " WHERE title LIKE '%" . $conn->real_escape_string($searchQuery) . "%' 
+                      OR description LIKE '%" . $conn->real_escape_string($searchQuery) . "%'";
+    }
+    $countResult = $conn->query($countSql);
+    $totalCount = $countResult->fetch_assoc()['total'];
+    $isLastPage = ($offset + $limit) >= $totalCount;
+
+    // 結果の配列を作成
+    $activities = [];
+    while ($row = $result->fetch_assoc()) {
+        // 日付のフォーマット
+        $row['created_at'] = date('Y年m月d日', strtotime($row['created_at']));
+        $activities[] = $row;
+    }
+
+    // JSONとして出力
+    header('Content-Type: application/json');
+    echo json_encode([
+        'activities' => $activities,
+        'isLastPage' => $isLastPage,
+        'page' => $page,
+        'totalCount' => $totalCount
+    ]);
+    exit;
+}
+
+// 通常のページ表示処理（以下は元のコード）
 // 最新の活動を取得（サイドバー用）
 $latestActivitiesQuery = "SELECT id, title, created_at FROM posts ORDER BY created_at DESC LIMIT 5";
 $latestActivitiesResult = $conn->query($latestActivitiesQuery);
@@ -23,7 +86,7 @@ if (!empty($searchQuery)) {
               OR description LIKE '%" . $conn->real_escape_string($searchQuery) . "%'";
 }
 
-$sql .= " ORDER BY created_at DESC";
+$sql .= " ORDER BY created_at DESC LIMIT 5"; // 最初は5件だけ表示
 
 // クエリの実行
 $result = $conn->query($sql);
@@ -47,6 +110,16 @@ if ($postDatesResult) {
         $postDays[] = (int)$date['post_day'];
     }
 }
+
+// 総件数を取得（もっと見るボタンの表示判定用）
+$countSql = "SELECT COUNT(*) as total FROM posts";
+if (!empty($searchQuery)) {
+    $countSql .= " WHERE title LIKE '%" . $conn->real_escape_string($searchQuery) . "%' 
+                  OR description LIKE '%" . $conn->real_escape_string($searchQuery) . "%'";
+}
+$countResult = $conn->query($countSql);
+$totalCount = $countResult->fetch_assoc()['total'];
+$hasMoreItems = $totalCount > 5; // 5件以上あれば「もっと見る」ボタンを表示
 
 // ヘッダーの読み込み
 include 'includes/header.php';
@@ -227,74 +300,77 @@ include 'includes/header.php';
       
       <!-- メインコンテンツ -->
       <div class="w-full md:w-3/4">
-        <?php if ($result->num_rows > 0): ?>
-          <?php while ($row = $result->fetch_assoc()): ?>
-            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-              <div class="md:flex">
-                <div class="md:w-1/3">
-                  <?php if (!empty($row['image_data'])): ?>
-                    <img 
-                      src="image.php?id=<?php echo $row['id']; ?>" 
-                      alt="<?php echo htmlspecialchars($row['title']); ?>"
-                      class="w-full h-48 md:h-full object-cover"
-                    >
-                  <?php else: ?>
-                    <div class="w-full h-48 md:h-full bg-gray-200 flex items-center justify-center">
-                      <span class="text-gray-500">画像なし</span>
-                    </div>
-                  <?php endif; ?>
-                </div>
-                <div class="md:w-2/3 p-6">
-                  <h3 class="text-xl font-bold mb-3"><?php echo htmlspecialchars($row['title']); ?></h3>
-                  
-                  <div class="grid gap-2 text-sm text-gray-600 mb-4">
-                    <div class="flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                        <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
-                        <line x1="16" x2="16" y1="2" y2="6"></line>
-                        <line x1="8" x2="8" y1="2" y2="6"></line>
-                        <line x1="3" x2="21" y1="10" y2="10"></line>
-                      </svg>
-                      <span><?php echo date('Y年m月d日', strtotime($row['created_at'])); ?></span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                      </svg>
-                      <span>参加者 <?php echo htmlspecialchars($row['participants']); ?>名</span>
-                    </div>
+        <div id="activities-container">
+          <?php if ($result->num_rows > 0): ?>
+            <?php while ($row = $result->fetch_assoc()): ?>
+              <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                <div class="md:flex">
+                  <div class="md:w-1/3">
+                    <?php if (!empty($row['image_data'])): ?>
+                      <img 
+                        src="image.php?id=<?php echo $row['id']; ?>" 
+                        alt="<?php echo htmlspecialchars($row['title']); ?>"
+                        class="w-full h-48 md:h-full object-cover"
+                      >
+                    <?php else: ?>
+                      <div class="w-full h-48 md:h-full bg-gray-200 flex items-center justify-center">
+                        <span class="text-gray-500">画像なし</span>
+                      </div>
+                    <?php endif; ?>
                   </div>
-                  
-                  <p class="line-clamp-3 mb-4"><?php echo htmlspecialchars($row['description']); ?></p>
-                  
-                  <div class="flex flex-wrap gap-2">
-                    <a href="activity_detail.php?id=<?php echo $row['id']; ?>" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                      詳細を見る
-                    </a>
+                  <div class="md:w-2/3 p-6">
+                    <h3 class="text-xl font-bold mb-3"><?php echo htmlspecialchars($row['title']); ?></h3>
+                    
+                    <div class="grid gap-2 text-sm text-gray-600 mb-4">
+                      <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                          <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+                          <line x1="16" x2="16" y1="2" y2="6"></line>
+                          <line x1="8" x2="8" y1="2" y2="6"></line>
+                          <line x1="3" x2="21" y1="10" y2="10"></line>
+                        </svg>
+                        <span><?php echo date('Y年m月d日', strtotime($row['created_at'])); ?></span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="9" cy="7" r="4"></circle>
+                          <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span>参加者 <?php echo htmlspecialchars($row['participants']); ?>名</span>
+                      </div>
+                    </div>
+                    
+                    <p class="line-clamp-3 mb-4"><?php echo htmlspecialchars($row['description']); ?></p>
+                    
+                    <div class="flex flex-wrap gap-2">
+                      <a href="activity_detail.php?id=<?php echo $row['id']; ?>" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                        詳細を見る
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
+            <?php endwhile; ?>
+          <?php else: ?>
+            <div class="bg-white rounded-lg shadow-md p-8 text-center">
+              <?php if (!empty($searchQuery)): ?>
+                <p>「<?php echo htmlspecialchars($searchQuery); ?>」に一致する活動記録はありません。</p>
+                <a href="list.php" class="inline-block mt-4 text-blue-600 hover:underline">すべての活動を表示</a>
+              <?php else: ?>
+                <p>活動記録はありません。</p>
+              <?php endif; ?>
             </div>
-          <?php endwhile; ?>
-          
-          <!-- ページネーション（必要に応じて） -->
+          <?php endif; ?>
+        </div>
+        
+        <?php if ($result->num_rows > 0 && $hasMoreItems): ?>
+          <!-- ページネーション（もっと見るボタン） -->
           <div class="flex justify-center mt-8">
-            <button class="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+            <button id="load-more-button" class="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
               もっと見る
             </button>
-          </div>
-          
-        <?php else: ?>
-          <div class="bg-white rounded-lg shadow-md p-8 text-center">
-            <?php if (!empty($searchQuery)): ?>
-              <p>「<?php echo htmlspecialchars($searchQuery); ?>」に一致する活動記録はありません。</p>
-              <a href="list.php" class="inline-block mt-4 text-blue-600 hover:underline">すべての活動を表示</a>
-            <?php else: ?>
-              <p>活動記録はありません。</p>
-            <?php endif; ?>
           </div>
         <?php endif; ?>
       </div>
@@ -302,5 +378,127 @@ include 'includes/header.php';
   </main>
 
   <?php include 'includes/footer.php'; ?>
+
+  <!-- 記事数が5個以上だと、もっと見るが表示される。 -->
+  <!-- もっと見るボタンの機能を実装するJavaScript -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const loadMoreButton = document.getElementById("load-more-button");
+      if (!loadMoreButton) return;
+
+      let currentPage = 1;
+      const itemsPerPage = 5; // 一度に読み込む件数
+      let isLoading = false;
+      let hasMoreItems = true;
+
+      loadMoreButton.addEventListener("click", () => {
+        if (isLoading || !hasMoreItems) return;
+
+        isLoading = true;
+        loadMoreButton.textContent = "読み込み中...";
+        loadMoreButton.disabled = true;
+
+        // 検索クエリがあれば取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchQuery = urlParams.get("search") || "";
+
+        // 追加データを取得
+        fetch(`list.php?ajax=load_more&page=${currentPage + 1}&limit=${itemsPerPage}&search=${encodeURIComponent(searchQuery)}`)
+          .then(response => response.json())
+          .then(data => {
+            isLoading = false;
+            loadMoreButton.disabled = false;
+            loadMoreButton.textContent = "もっと見る";
+
+            if (data.activities && data.activities.length > 0) {
+              // 新しい活動を追加
+              const container = document.getElementById("activities-container");
+
+              data.activities.forEach(activity => {
+                const activityHtml = createActivityCard(activity);
+                container.insertAdjacentHTML("beforeend", activityHtml);
+              });
+
+              currentPage++;
+
+              // すべてのデータを表示したらボタンを非表示
+              if (data.activities.length < itemsPerPage || data.isLastPage) {
+                hasMoreItems = false;
+                loadMoreButton.style.display = "none";
+              }
+            } else {
+              // これ以上データがない場合
+              hasMoreItems = false;
+              loadMoreButton.style.display = "none";
+            }
+          })
+          .catch(error => {
+            console.error("活動の読み込み中にエラーが発生しました:", error);
+            isLoading = false;
+            loadMoreButton.disabled = false;
+            loadMoreButton.textContent = "もっと見る";
+          });
+      });
+
+      // 活動カードのHTMLを生成する関数
+      function createActivityCard(activity) {
+        const imageHtml = activity.has_image
+          ? `<img src="image.php?id=${activity.id}" alt="${escapeHtml(activity.title)}" class="w-full h-48 md:h-full object-cover">`
+          : `<div class="w-full h-48 md:h-full bg-gray-200 flex items-center justify-center"><span class="text-gray-500">画像なし</span></div>`;
+
+        return `
+          <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="md:flex">
+              <div class="md:w-1/3">
+                ${imageHtml}
+              </div>
+              <div class="md:w-2/3 p-6">
+                <h3 class="text-xl font-bold mb-3">${escapeHtml(activity.title)}</h3>
+                
+                <div class="grid gap-2 text-sm text-gray-600 mb-4">
+                  <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                      <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+                      <line x1="16" x2="16" y1="2" y2="6"></line>
+                      <line x1="8" x2="8" y1="2" y2="6"></line>
+                      <line x1="3" x2="21" y1="10" y2="10"></line>
+                    </svg>
+                    <span>${activity.created_at}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span>参加者 ${escapeHtml(activity.participants)}名</span>
+                  </div>
+                </div>
+                
+                <p class="line-clamp-3 mb-4">${escapeHtml(activity.description)}</p>
+                
+                <div class="flex flex-wrap gap-2">
+                  <a href="activity_detail.php?id=${activity.id}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                    詳細を見る
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // HTMLエスケープ関数
+      function escapeHtml(unsafe) {
+        return unsafe
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+    });
+  </script>
 </body>
 </html>
