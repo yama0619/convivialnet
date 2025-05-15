@@ -83,14 +83,17 @@ $recent_blogs_result = $conn->query($recent_blogs_query);
                             サイトを表示
                         </a>
                         <div class="relative">
-                            <button class="flex items-center text-gray-700 focus:outline-none">
-                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white">
-                                    <?php echo substr($_SESSION["username"], 0, 1); ?>
-                                </div>
-                                <span class="ml-2"><?php echo htmlspecialchars($_SESSION["username"]); ?></span>
-                                <i class="fas fa-chevron-down ml-1 text-xs"></i>
-                            </button>
-                        </div>
+    <button id="userMenuButton" class="flex items-center text-gray-700 focus:outline-none">
+        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white">
+            <?php echo substr($_SESSION["username"], 0, 1); ?>
+        </div>
+        <span class="ml-2"><?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+        <i class="fas fa-chevron-down ml-1 text-xs"></i>
+    </button>
+    <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden">
+        <a href="../logout.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">ログアウト</a>
+    </div>
+</div>
                     </div>
                 </div>
             </header>
@@ -274,4 +277,27 @@ $recent_blogs_result = $conn->query($recent_blogs_query);
         </div>
     </div>
 </body>
+<script>
+    // ユーザーメニュートグル
+    const userMenuButton = document.getElementById('userMenuButton');
+    const userMenu = document.getElementById('userMenu');
+    
+    // メニューボタンをクリックしたときの処理
+    userMenuButton.addEventListener('click', function(event) {
+        // イベントの伝播を停止（これがないと、documentのクリックイベントも発火してしまう）
+        event.stopPropagation();
+        
+        // メニューの表示/非表示を切り替え
+        userMenu.classList.toggle('hidden');
+    });
+    
+    // ドキュメント全体のクリックを検知
+    document.addEventListener('click', function(event) {
+        // クリックされた要素がメニュー内部でない場合
+        if (!userMenu.contains(event.target) && !userMenuButton.contains(event.target)) {
+            // メニューを非表示にする
+            userMenu.classList.add('hidden');
+        }
+    });
+</script>
 </html>

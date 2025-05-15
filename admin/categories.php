@@ -275,9 +275,6 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
                                 <i class="fas fa-chevron-down ml-1 text-xs"></i>
                             </button>
                             <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden">
-                                <a href="profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">プロフィール</a>
-                                <a href="settings.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">設定</a>
-                                <div class="border-t border-gray-100"></div>
                                 <a href="../logout.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">ログアウト</a>
                             </div>
                         </div>
@@ -599,90 +596,106 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
     </div>
 
     <script>
-        // ユーザーメニュートグル
-        document.getElementById('userMenuButton').addEventListener('click', function() {
-            const menu = document.getElementById('userMenu');
+    // ユーザーメニュートグル
+    const userMenuButton = document.getElementById('userMenuButton');
+    const userMenu = document.getElementById('userMenu');
+    
+    // メニューボタンをクリックしたときの処理
+    userMenuButton.addEventListener('click', function(event) {
+        // イベントの伝播を停止（これがないと、documentのクリックイベントも発火してしまう）
+        event.stopPropagation();
+        
+        // メニューの表示/非表示を切り替え
+        userMenu.classList.toggle('hidden');
+    });
+    
+    // ドキュメント全体のクリックを検知
+    document.addEventListener('click', function(event) {
+        // クリックされた要素がメニュー内部でない場合
+        if (!userMenu.contains(event.target) && !userMenuButton.contains(event.target)) {
+            // メニューを非表示にする
+            userMenu.classList.add('hidden');
+        }
+    });
+
+    // ドロップダウンメニュー
+    document.querySelectorAll('.dropdown').forEach(dropdown => {
+        const button = dropdown.querySelector('button');
+        const menu = dropdown.querySelector('.dropdown-menu');
+        
+        button.addEventListener('click', () => {
             menu.classList.toggle('hidden');
         });
+    });
 
-        // ドロップダウンメニュー
-        document.querySelectorAll('.dropdown').forEach(dropdown => {
-            const button = dropdown.querySelector('button');
-            const menu = dropdown.querySelector('.dropdown-menu');
-            
-            button.addEventListener('click', () => {
-                menu.classList.toggle('hidden');
-            });
-        });
-
-        // モーダル表示
-        function showModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.add('modal-active');
-            }, 10);
-        }
-
-        // モーダル非表示
-        function hideModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.classList.remove('modal-active');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 200);
-        }
-
-        // カテゴリ名変更モーダル表示
-        function showRenameModal(categoryName) {
-            document.getElementById('old_category_name').value = categoryName;
-            document.getElementById('new_category_name').value = categoryName;
-            showModal('renameCategoryModal');
-        }
-
-        // カテゴリ削除確認モーダル表示
-        function confirmDelete(categoryName) {
-            document.getElementById('delete_category_name').value = categoryName;
-            document.getElementById('deleteTargetName').textContent = categoryName;
-            showModal('deleteCategoryModal');
-        }
-
-        // カテゴリ検索機能
-        document.getElementById('categorySearch').addEventListener('keyup', function() {
-            const searchValue = this.value.toLowerCase();
-            const tableRows = document.querySelectorAll('tbody tr');
-            
-            tableRows.forEach(row => {
-                const categoryName = row.querySelector('td:first-child')?.textContent.toLowerCase() || '';
-                
-                if (categoryName.includes(searchValue)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-
-        // モーダル外クリックで閉じる
-        document.querySelectorAll('.modal-container').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    const modalId = modal.getAttribute('id');
-                    hideModal(modalId);
-                }
-            });
-        });
-
-        // 通知メッセージの自動非表示
+    // モーダル表示
+    function showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.remove('hidden');
         setTimeout(() => {
-            const alerts = document.querySelectorAll('[role="alert"]');
-            alerts.forEach(alert => {
-                alert.style.opacity = '0';
-                setTimeout(() => {
-                    alert.remove();
-                }, 500);
-            });
-        }, 5000);
-    </script>
+            modal.classList.add('modal-active');
+        }, 10);
+    }
+
+    // モーダル非表示
+    function hideModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.remove('modal-active');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 200);
+    }
+
+    // カテゴリ名変更モーダル表示
+    function showRenameModal(categoryName) {
+        document.getElementById('old_category_name').value = categoryName;
+        document.getElementById('new_category_name').value = categoryName;
+        showModal('renameCategoryModal');
+    }
+
+    // カテゴリ削除確認モーダル表示
+    function confirmDelete(categoryName) {
+        document.getElementById('delete_category_name').value = categoryName;
+        document.getElementById('deleteTargetName').textContent = categoryName;
+        showModal('deleteCategoryModal');
+    }
+
+    // カテゴリ検索機能
+    document.getElementById('categorySearch').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const tableRows = document.querySelectorAll('tbody tr');
+        
+        tableRows.forEach(row => {
+            const categoryName = row.querySelector('td:first-child')?.textContent.toLowerCase() || '';
+            
+            if (categoryName.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // モーダル外クリックで閉じる
+    document.querySelectorAll('.modal-container').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                const modalId = modal.getAttribute('id');
+                hideModal(modalId);
+            }
+        });
+    });
+
+    // 通知メッセージの自動非表示
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('[role="alert"]');
+        alerts.forEach(alert => {
+            alert.style.opacity = '0';
+            setTimeout(() => {
+                alert.remove();
+            }, 500);
+        });
+    }, 5000);
+</script>
 </body>
 </html>
