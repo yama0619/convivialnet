@@ -218,6 +218,8 @@ include 'includes/header.php';
             <h3 class="font-bold text-lg mb-4">活動カレンダー</h3>
             <div class="bg-gray-50 p-3 rounded-lg text-center">
               <div class="text-sm font-medium text-gray-500 mb-2"><?php echo date('Y年m月'); ?></div>
+              <div class="overflow-x-auto">
+
               <table class="w-full text-xs">
                 <thead>
                   <tr>
@@ -278,6 +280,7 @@ include 'includes/header.php';
                   ?>
                 </tbody>
               </table>
+                  </div>
               <div class="mt-3 text-xs flex items-center justify-center">
                 <span class="inline-block w-3 h-3 bg-red-500 rounded-full mr-1"></span>
                 <span class="text-gray-600">投稿がある日付</span>

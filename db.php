@@ -2,7 +2,7 @@
 $host = "localhost";
 $dbname = "convivialnet"; // データベース名を設定
 $username = "root";  
-$password = "yama333"; //ConvPass00
+$password = ""; //ConvPass00
 
 $conn = new mysqli($host, $username, $password, $dbname);
 
